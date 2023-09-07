@@ -1,6 +1,6 @@
-import enum
+from .meta_schema_enum import MetaSchemaEnum
 
-class SchemaType(enum.Enum):
+class SchemaType(MetaSchemaEnum):
   STR = "str"
   GUID = "guid"
   INT = "int"

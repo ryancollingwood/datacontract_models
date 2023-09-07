@@ -1,5 +1,5 @@
-from typing import List
-from pydantic import BaseModel, ConfigDict, Extra
+from typing import List, Optional
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 from models import Cardinality, SchemaType
 
@@ -26,15 +26,15 @@ class DatabaseTable(MetaSchemaBaseModel):
 class DatabaseColumn(MetaSchemaBaseModel):
   table: DatabaseTable
   schema_type: SchemaType
-  is_null: bool
+  not_null: bool
   is_unique: bool
-  references: 'DatabaseColumn' = None
+  references: Optional['DatabaseColumn'] = Field(default = None)
 
 class Property(MetaSchemaBaseModel):
   attribute: PropertyAttribute
-  source: DatabaseColumn
+  source: Optional[DatabaseColumn ] = Field(default = None)
   cardinality: Cardinality
-  is_identifier: bool
+  is_identifier: bool = Field(default=False)
 
 class Aggregate(MetaSchemaBaseModel):
   properties: List[Property]

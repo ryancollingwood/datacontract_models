@@ -37,7 +37,7 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
     def check_source(cls, value: "CaptureSheetRowModel"):
         column_specified = cls.is_specified(value.column)
         table_specified = cls.is_specified(value.table)
-        is_null_specified = cls.is_specified(value.not_null)
+        not_null_specified = cls.is_specified(value.not_null)
         is_unique_specified = cls.is_specified(value.is_unique)
 
         if column_specified or table_specified:
@@ -49,7 +49,7 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
                 "If table and column are specified"
                 " - not_null and is_unique must be specified"
             )
-            assert all([is_null_specified, is_unique_specified]), msg
+            assert all([not_null_specified, is_unique_specified]), msg
 
         return value
 

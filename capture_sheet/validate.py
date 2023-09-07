@@ -12,6 +12,7 @@ from .column_names import OUTCOME, RESULT
 
 def validate_df_row(row):
     try:
+        # remove np.nan values as it trips up pydantic
         values = {k:v for k,v in row.to_dict().items() if not pd.isnull(v)}
         result = CaptureSheetRowModel(**values)
         return True, result
@@ -25,6 +26,9 @@ def validate_capture_sheet_model(df: pd.DataFrame) -> pd.DataFrame:
         columns=[OUTCOME, RESULT],
     )
 
+    # having to double handle the json conversion is a bit of a hack
+    # so that we can get the json representation of the pydantic model
+    # or the exception if one was raised
     result_df[RESULT] = result_df[RESULT].apply(lambda x: json.loads(x.json()))
     return result_df
 
@@ -35,6 +39,23 @@ def check_uniqueness(
     partition_cols: List[str] = None,
     parent_cols: List[str] = None,
 ):
+    """
+    Check that the values in the `check_column` are unique for the given
+    partition and parent columns.
+
+    Args:
+        df (pd.DataFrame)
+        check_column (str): Column to check for unique values
+        partition_cols (List[str], optional): The subset of columns to be 
+            evaluated as part of the uniqueness check.
+            Defaults to None.
+        parent_cols (List[str], optional): The column by which we want to
+            groupby after having filtered to subset of columns.
+            Defaults to None.
+
+    Raises:
+        e: AssertionError if the uniqueness check fails
+    """
     if partition_cols is not None:
         actual_partition = deepcopy(partition_cols)
         if check_column not in actual_partition:
@@ -95,7 +116,7 @@ def validate_capture_sheet(df: pd.DataFrame):
             ATTRIBUTE,
             ATTRIBUTE_CARDINALITY,
         ],
-        ["event", "entity"],
+        [EVENT, ENTITY],
     )
 
     check_uniqueness(
@@ -129,10 +150,10 @@ def validate_capture_sheet(df: pd.DataFrame):
         [EVENT, ENTITY],
     )
 
+    # Creating a new column to check uniqueness of the combination of:
+    # database, table, column schema_type, not_null, and is_unique values
     validate_df["dbo"] = validate_df[[DATABASE, TABLE, COLUMN]].dropna().apply(lambda x: ".".join(x), axis = 1)
-    # validate_df["dbo"] = validate_df["dbo"].replace({np.nan: None})
 
-    # Column	Table	Database
     check_uniqueness(
         validate_df, 'dbo',
         [DATABASE, TABLE, COLUMN, SCHEMA_TYPE, NOT_NULL, IS_UNIQUE]
