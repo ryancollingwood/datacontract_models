@@ -4,3 +4,4 @@ pydantic==2.3.0
 mypy==1.5.1
 black==23.7.0
 rope==1.9.0
+anytree
