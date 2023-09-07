@@ -1,16 +1,13 @@
-from typing import Any
-from pydantic import BaseModel, ConfigDict, Field, Extra, model_validator
+from typing import Any, Optional
+
+from pydantic import Field, model_validator
 
 from models import Cardinality, SchemaType
 
-
-class CaptureSheetBaseModel(BaseModel):
-    model_config: ConfigDict = ConfigDict(
-        str_to_lower=True, validate_default=True, extra=Extra.ignore
-    )
+from .capture_sheet_base_model import CaptureSheetBaseModel
 
 
-class CaptureSheetModel(CaptureSheetBaseModel):
+class CaptureSheetRowModel(CaptureSheetBaseModel):
     event: str
     raised_by: str
     received_by: str
@@ -20,14 +17,13 @@ class CaptureSheetModel(CaptureSheetBaseModel):
     attribute_cardinality: Cardinality
     semantic_type: str
     schema_type: SchemaType
-    column: str | None = Field(default=None)
-    table: str | None = Field(default=True)
-    database: str | None = Field(default=True)
-    # TODO rename is null
-    is_null: bool | None = Field(default=True)
-    is_unique: bool | None = Field(default=True)
-    reference_table: str | None = Field(default=None)
-    reference_column: str | None = Field(default=None)
+    column: Optional[str | None] = Field(default = None)
+    table: Optional[str | None] = Field(default = None)
+    database: Optional[str | None] = Field(default = None)
+    not_null: Optional[bool | None] = Field(default = None)
+    is_unique: Optional[bool | None] = Field(default = None)
+    reference_table: Optional[str | None] = Field(default = None)
+    reference_column: Optional[str | None] = Field(default = None)
 
     @classmethod
     def is_specified(cls, value: Any):
@@ -38,10 +34,10 @@ class CaptureSheetModel(CaptureSheetBaseModel):
         return result
 
     @model_validator(mode="after")
-    def check_source(cls, value: "CaptureSheetModel"):
+    def check_source(cls, value: "CaptureSheetRowModel"):
         column_specified = cls.is_specified(value.column)
         table_specified = cls.is_specified(value.table)
-        is_null_specified = cls.is_specified(value.is_null)
+        is_null_specified = cls.is_specified(value.not_null)
         is_unique_specified = cls.is_specified(value.is_unique)
 
         if column_specified or table_specified:
@@ -51,14 +47,14 @@ class CaptureSheetModel(CaptureSheetBaseModel):
         if column_specified and table_specified:
             msg = (
                 "If table and column are specified"
-                " - is_null and is_unique must be specified"
+                " - not_null and is_unique must be specified"
             )
             assert all([is_null_specified, is_unique_specified]), msg
 
         return value
 
     @model_validator(mode="after")
-    def check_reference(cls, value: "CaptureSheetModel"):
+    def check_reference(cls, value: "CaptureSheetRowModel"):
         ref_table_specified = cls.is_specified(value.reference_table)
         ref_column_specified = cls.is_specified(value.reference_column)
 

@@ -1,8 +1,9 @@
 from typing import List
 from copy import deepcopy
+import json
 import pandas as pd
 from pydantic import ValidationError
-from .capture_sheet_model import CaptureSheetModel
+from .models.capture_sheet_row_model import CaptureSheetRowModel
 from .column_names import EVENT, RAISED_BY, RECEIVED_BY, ENTITY, ENTITY_CARDINALITY
 from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, SEMANTIC_TYPE, SCHEMA_TYPE
 from .column_names import DATABASE, TABLE, COLUMN, NOT_NULL, IS_UNIQUE
@@ -11,7 +12,8 @@ from .column_names import OUTCOME, RESULT
 
 def validate_df_row(row):
     try:
-        result = CaptureSheetModel(**row)
+        values = {k:v for k,v in row.to_dict().items() if not pd.isnull(v)}
+        result = CaptureSheetRowModel(**values)
         return True, result
     except ValidationError as e:
         return False, e
@@ -23,7 +25,7 @@ def validate_capture_sheet_model(df: pd.DataFrame) -> pd.DataFrame:
         columns=[OUTCOME, RESULT],
     )
 
-    result_df[RESULT] = result_df[RESULT].apply(lambda x: x.json())
+    result_df[RESULT] = result_df[RESULT].apply(lambda x: json.loads(x.json()))
     return result_df
 
 
