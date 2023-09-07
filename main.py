@@ -1,7 +1,7 @@
-
 from typing import Tuple
 from pathlib import Path
 from datetime import datetime
+import black
 import pandas as pd
 from capture_sheet import (
     process_capture_sheet,
@@ -11,7 +11,8 @@ from capture_sheet import (
     parse_capture_sheet_rows,
 )
 from common.str_utils import sluggify
-import black
+from refactoring import variable_extraction
+
 
 def process_and_validate_capture_sheet(
     capture_sheet_path: Path, output_path: Path, sheet_name="Sheet1"
@@ -45,7 +46,9 @@ def generate_capture_sheet_code(valid_path: Path, generated_file_stem: str) -> P
         for event_name, event_data in capture_sheet.events.items():
             f.write(f"event_{sluggify(event_name)} = {event_data.__repr__()}\n\n")
 
-    out = black.format_file_contents(generated_path.read_text(), fast = False, mode = black.FileMode())
+    out = black.format_file_contents(
+        generated_path.read_text(), fast=False, mode=black.FileMode()
+    )
     generated_path.write_text(out)
 
     return generated_path
@@ -53,10 +56,11 @@ def generate_capture_sheet_code(valid_path: Path, generated_file_stem: str) -> P
 
 if __name__ == "__main__":
     Path("output").mkdir(parents=True, exist_ok=True)
-    output_path = Path("output") / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    #output_path = Path("output") / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    output_path = Path("output")
     output_path.mkdir(parents=True, exist_ok=True)
 
-    input_file_path = Path("resources/Order Events.xlsx") 
+    input_file_path = Path("resources/Order Events.xlsx")
 
     is_valid, valid_path = process_and_validate_capture_sheet(
         input_file_path, output_path, sheet_name="Sheet1"
@@ -66,6 +70,21 @@ if __name__ == "__main__":
         print("Validation failed. Please fix errors and try again.")
         exit(1)
 
-    generated_path = generate_capture_sheet_code(valid_path, sluggify(input_file_path.stem))
-    
+    generated_path = generate_capture_sheet_code(
+        valid_path, sluggify(input_file_path.stem)
+    )
+
     print(generated_path)
+    variable_extraction(
+        generated_path,
+        [
+            "SemanticType",
+            "PropertyAttribute",
+            "Database",
+            "DatabaseTable",
+            "DatabaseColumn",
+            "PropertyAttribute",
+            "Aggregate",
+        ],
+        debug=True,
+    )
