@@ -1,16 +1,27 @@
 import ast
 import anytree
 
+from typing import List, Tuple
 from .annotate_node_transformer import AnnotateNodeTransformer
 
 class AstAnytree:
-    def __init__(self, module, filter_ids) -> None:
+    def __init__(self, module, filter_ids: List[str]):
         self.filter_ids = filter_ids
         self.module = AnnotateNodeTransformer(module, filter_ids).visit(module)
         self.root = None
         self.tree_nodes = dict()
 
     def build_tree(self):
+        """
+        Build a tree from the given ast node (assumed to be a module)
+
+        Raises:
+            ValueError: If there is already a root node and we attempt to add another
+            ValueError: If we cannot locate the parent node for a child node
+
+        Returns:
+            AstAnytree: Returns the current instance for chaining operations
+        """
         self.root = None
         self.tree_nodes = dict()
 
@@ -60,7 +71,17 @@ class AstAnytree:
     def search_tree_by_var_name(self, value):
         return anytree.search.findall(self.root, filter_=lambda node: node.var_name == value)
 
-    def get_leaf_names(self, node_id):
+    def get_leaf_names(self, node_id) -> List[str]:
+        """
+        For the given node_id return the variable names of parent nodes
+        if they are within the filter_ids. 
+        This is can used to determine variable names.
+        Args:
+            node_id (int):
+
+        Returns:
+            List[str]: var_names of parent nodes that macth the filter_ids
+        """
         leaf_var_names = list()
         leaf_node = self.tree_nodes[node_id]
 

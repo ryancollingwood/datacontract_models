@@ -1,5 +1,5 @@
 import ast
-from typing import List
+from typing import List, Tuple
 import rope
 
 
@@ -46,7 +46,18 @@ def walk_filter(tree: ast.Module, filter_ids: List[str], max_items: int = -1):
     return results
 
 
-def get_node_start_end(node: ast.AST, my_module: rope.base.pyobjects.PyObject):
+def get_node_start_end(node: ast.AST, my_module: rope.base.pyobjects.PyObject) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+    """
+    For the given node, return the start and end positions in the file.
+    Both the start and end are tuples of (line, column).
+
+    Args:
+        node (ast.AST)
+        my_module (rope.base.pyobjects.PyObject)
+
+    Returns:
+        Tuple[Tuple[int, int], Tuple[int, int]]
+    """
     start_line = node.value.lineno
     start_col = node.value.col_offset
     start = my_module.lines.get_line_start(start_line) + start_col
