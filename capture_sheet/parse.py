@@ -3,7 +3,6 @@ from typing import Dict, List
 import json
 from dataclasses import dataclass
 from models import (
-    MetaSchemaBaseModel,
     SemanticType,
     PropertyAttribute,
     Actor,
@@ -91,7 +90,6 @@ class CaptureSheetParser:
             source = self.capture_sheet.database_columns[database_column]
 
         return Property(
-            name=self.capture_sheet.property_attributes[property_attribute].name,
             attribute=attribute,
             source=source,
             cardinality=attribute_cardinality,
@@ -156,7 +154,6 @@ class CaptureSheetParser:
         self.property_buffer = list()
 
         new_event_aggregate = EventAggregate(
-                name=aggregate_name,
                 aggregate=self.capture_sheet.aggregates[aggregate_name],
                 cardinality=aggregate_cardinality,
             )

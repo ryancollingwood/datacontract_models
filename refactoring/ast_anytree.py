@@ -1,7 +1,7 @@
 import ast
 import anytree
 
-from typing import List, Tuple
+from typing import List
 from .annotate_node_transformer import AnnotateNodeTransformer
 
 class AstAnytree:

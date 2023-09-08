@@ -1,52 +1,44 @@
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict, Extra, Field
+from pydantic import Field
 
-from models import Cardinality, SchemaType
+from models import SchemaType
+from .meta_schema_base_model import MetaSchemaModel, MetaSchemaContainerModel
 
 
-class MetaSchemaBaseModel(BaseModel):
-    model_config: ConfigDict = ConfigDict(
-        str_to_lower=True, validate_default=True, extra=Extra.ignore
-      )
-
-    name: str
-
-class SemanticType(MetaSchemaBaseModel):
+class SemanticType(MetaSchemaModel):
   pass
 
-class PropertyAttribute(MetaSchemaBaseModel):
+class PropertyAttribute(MetaSchemaModel):
   semantic_type: SemanticType
 
-class Database(MetaSchemaBaseModel):
+class Database(MetaSchemaModel):
   pass
 
-class DatabaseTable(MetaSchemaBaseModel):
+class DatabaseTable(MetaSchemaModel):
   database: Database
 
-class DatabaseColumn(MetaSchemaBaseModel):
+class DatabaseColumn(MetaSchemaModel):
   table: DatabaseTable
   schema_type: SchemaType
   not_null: bool
   is_unique: bool
   references: Optional['DatabaseColumn'] = Field(default = None)
 
-class Property(MetaSchemaBaseModel):
+class Property(MetaSchemaContainerModel):
   attribute: PropertyAttribute
-  source: Optional[DatabaseColumn ] = Field(default = None)
-  cardinality: Cardinality
+  source: Optional[DatabaseColumn] = Field(default = None)
   is_identifier: bool = Field(default=False)
 
-class Aggregate(MetaSchemaBaseModel):
+class Aggregate(MetaSchemaModel):
   properties: List[Property]
 
-class EventAggregate(MetaSchemaBaseModel):
+class EventAggregate(MetaSchemaContainerModel):
   aggregate: Aggregate
-  cardinality: Cardinality
 
-class Actor(MetaSchemaBaseModel):
+class Actor(MetaSchemaModel):
   pass
 
-class Event(MetaSchemaBaseModel):
+class Event(MetaSchemaModel):
   raised_by: Actor
   received_by: Actor
   aggregates: List[EventAggregate]

@@ -1,7 +1,7 @@
 from .cardinality import Cardinality
 from .schema_type import SchemaType
+from .meta_schema_base_model import MetaSchemaBaseModel, MetaSchemaModel, MetaSchemaContainerModel
 from .meta_schema import (
-    MetaSchemaBaseModel,
     Event,
     Actor,
     Property,
