@@ -88,3 +88,8 @@ if __name__ == "__main__":
         ],
         debug=True,
     )
+
+    out = black.format_file_contents(
+        generated_path.read_text(), fast=False, mode=black.FileMode()
+    )
+    generated_path.write_text(out)
