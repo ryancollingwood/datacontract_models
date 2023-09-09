@@ -12,7 +12,6 @@ from capture_sheet import (
 )
 from common.str_utils import sluggify
 from refactoring import variable_extraction
-from models import render_contract
 
 
 def process_and_validate_capture_sheet(
