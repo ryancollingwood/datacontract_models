@@ -4,6 +4,7 @@ from typing import Any, Dict
 from pydantic import BaseModel, ConfigDict, Extra
 from common.str_utils import sluggify
 from .cardinality import Cardinality
+from .consts import NAME, OPTIONAL, MULTIPLE
 
 class MetaSchemaBaseModel(BaseModel):
     model_config: ConfigDict = ConfigDict(
@@ -23,7 +24,7 @@ class MetaSchemaBaseModel(BaseModel):
                 # print("Warning: no name attribute found for MetaSchemaContainerModel:", value)
                 for key, val in value.__dict__.items():
                     if isinstance(val, MetaSchemaBaseModel):
-                        label = f"{key}_{val.name}"
+                        label = f"{key} {val.name}"
                         break
         elif isinstance(value, dict):
             label = value.get("name")
