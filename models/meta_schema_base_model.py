@@ -2,6 +2,7 @@ from copy import deepcopy
 from enum import Enum
 from typing import Any, Dict
 from pydantic import BaseModel, ConfigDict, Extra
+from common.str_utils import sluggify
 from .cardinality import Cardinality
 
 class MetaSchemaBaseModel(BaseModel):
@@ -30,7 +31,7 @@ class MetaSchemaBaseModel(BaseModel):
         if label is None:
             raise ValueError(f"Could not determine label for {type(value)}: {value}")
 
-        return label
+        return sluggify(label)
     
     def get_contract_items(self) -> Dict[str, Any]:
         return self.__dict__
