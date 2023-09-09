@@ -36,7 +36,7 @@ class MetaSchemaBaseModel(BaseModel):
     def get_contract_items(self) -> Dict[str, Any]:
         return self.__dict__
     
-    def to_contract(self, include_name: bool = True):
+    def to_contract(self, is_root: bool = True):
         def add_result(output, k, v):
             k_saved = deepcopy(k)
             v_saved = deepcopy(v)
@@ -61,7 +61,7 @@ class MetaSchemaBaseModel(BaseModel):
         
         result = dict()
         for k,v in self.get_contract_items().items():
-            if not include_name and k == 'name':
+            if not is_root and k == 'name':
                 continue
 
             if isinstance(v, Cardinality):
@@ -79,7 +79,7 @@ class MetaSchemaBaseModel(BaseModel):
 
             if k not in result:
                 if isinstance(v, MetaSchemaBaseModel):
-                    result = add_result(result, k, v.to_contract(include_name=False))
+                    result = add_result(result, k, v.to_contract(is_root=False))
                 else:
                     result = add_result(result, k, v)
         
