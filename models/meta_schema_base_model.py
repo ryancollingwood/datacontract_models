@@ -36,8 +36,7 @@ class MetaSchemaBaseModel(BaseModel):
     def get_contract_items(self) -> Dict[str, Any]:
         return self.__dict__
     
-    # todo move to own class
-    def to_contract(self, include_name: bool = False):
+    def to_contract(self, include_name: bool = True):
         def add_result(output, k, v):
             k_saved = deepcopy(k)
             v_saved = deepcopy(v)
@@ -46,8 +45,7 @@ class MetaSchemaBaseModel(BaseModel):
                 k_saved = list(v_saved.keys())[0]
                 v_saved = list(v_saved.values())[0]
             
-            # make this a option
-            #if v_saved is None and not include_none:
+            # could make make this an option
             if v_saved is None:
                 return result
             
@@ -77,11 +75,11 @@ class MetaSchemaBaseModel(BaseModel):
             elif isinstance(v, list) or isinstance(v, set):
                 element_types = [isinstance(x, MetaSchemaContainerModel) for x in v]
                 if all(element_types):
-                    result = add_result(result, k, {x.get_meta_schema_label():x.to_contract() for x in v})
+                    result = add_result(result, k, {x.get_meta_schema_label():x.to_contract(include_name=False) for x in v})
 
             if k not in result:
                 if isinstance(v, MetaSchemaBaseModel):
-                    result = add_result(result, k, v.to_contract())
+                    result = add_result(result, k, v.to_contract(include_name=False))
                 else:
                     result = add_result(result, k, v)
         
