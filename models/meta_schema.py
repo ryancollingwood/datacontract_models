@@ -25,7 +25,7 @@ class DatabaseColumn(MetaSchemaModel):
   is_unique: bool
   references: Optional['DatabaseColumn'] = Field(default = None)
 
-  def to_contract(self):
+  def get_contract_items(self):
     return {
       'database': self.table.database.name,
       'table': self.table.name,
@@ -44,44 +44,14 @@ class Property(MetaSchemaContainerModel):
   def name(self):
       return self.attribute.name
 
-  def to_contract(self):
-    allows_zero = self.cardinality in [Cardinality.ZERO_OR_ONE, Cardinality.ZERO_OR_MANY]
-
-    result = {
-      'semantic_type': self.attribute.semantic_type.get_meta_schema_label(),
-      'is_identifier': self.is_identifier,
-      'optional': allows_zero,
-    }
-
-    if self.source:
-      result['source'] = self.source.to_contract()
-
-    if self.cardinality not in [Cardinality.ONLY_ONE, Cardinality.ZERO_OR_ONE]:
-      result['type'] = 'list'
-    
-    return result
-
 class Aggregate(MetaSchemaModel):
   properties: List[Property]
-  
-  def to_contract(self):
-    return {
-      self.name: [{p.get_meta_schema_label():p.to_contract() for p in self.properties}]
-    }
 
 class EventAggregate(MetaSchemaContainerModel):
   aggregate: Aggregate
 
   def name(self):
     return self.aggregate.name
-
-  def to_contract(self):
-    allows_zero = self.cardinality in [Cardinality.ZERO_OR_ONE, Cardinality.ZERO_OR_MANY]
-    result = self.aggregate.to_contract()
-    result['optional'] = allows_zero
-    if self.cardinality not in [Cardinality.ONLY_ONE, Cardinality.ZERO_OR_ONE]:
-      result['type'] = 'list'
-    return result
 
 class Actor(MetaSchemaModel):
   pass
@@ -90,12 +60,3 @@ class Event(MetaSchemaModel):
   raised_by: Actor
   received_by: Actor
   aggregates: List[EventAggregate]
-
-  def to_contract(self):
-    result = {
-      'event_name': self.name,
-      'raised_by': self.raised_by.name,
-      'received_by': self.received_by.name,
-      'data': [a.to_contract() for a in self.aggregates]
-    }
-    return result
