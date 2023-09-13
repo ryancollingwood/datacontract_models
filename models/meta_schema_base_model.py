@@ -17,7 +17,7 @@ class MetaSchemaBaseModel(BaseModel):
         if isinstance(value, MetaSchemaModel):
             label = value.name
         elif isinstance(value, MetaSchemaContainerModel):
-            if hasattr(value, "name"):
+            if hasattr(value, NAME):
                 label = value.name()
             else:
                 # todo raise a warning
@@ -27,7 +27,7 @@ class MetaSchemaBaseModel(BaseModel):
                         label = f"{key} {val.name}"
                         break
         elif isinstance(value, dict):
-            label = value.get("name")
+            label = value.get(NAME)
             
         if label is None:
             raise ValueError(f"Could not determine label for {type(value)}: {value}")
@@ -62,21 +62,21 @@ class MetaSchemaBaseModel(BaseModel):
         
         result = dict()
         for k,v in self.get_contract_items().items():
-            if not is_root and k == 'name':
+            if not is_root and k == NAME:
                 continue
 
             if isinstance(v, Cardinality):
                 allows_zero = v in [Cardinality.ZERO_OR_ONE, Cardinality.ZERO_OR_MANY]
                 singular = [Cardinality.ONLY_ONE, Cardinality.ZERO_OR_ONE]            
-                result = add_result(result, 'optional', allows_zero)
-                result = add_result(result, 'multiple', not singular)
+                result = add_result(result, OPTIONAL, allows_zero)
+                result = add_result(result, MULTIPLE, not singular)
                 continue
             elif isinstance(v, Enum):
                 result = add_result(result, k, str(v.value))
             elif isinstance(v, list) or isinstance(v, set):
                 element_types = [isinstance(x, MetaSchemaContainerModel) for x in v]
                 if all(element_types):
-                    result = add_result(result, k, {x.get_meta_schema_label():x.to_contract(include_name=False) for x in v})
+                    result = add_result(result, k, {x.get_meta_schema_label():x.to_contract(is_root=False) for x in v})
 
             if k not in result:
                 if isinstance(v, MetaSchemaBaseModel):
