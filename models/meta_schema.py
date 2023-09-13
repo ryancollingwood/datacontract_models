@@ -3,11 +3,12 @@ from pydantic import Field, validator
 
 from .schema_type import SchemaType
 from .cardinality import Cardinality
+from .data_classification import DataClassification
 from .meta_schema_base_model import MetaSchemaModel, MetaSchemaContainerModel
 
 
 class SemanticType(MetaSchemaModel):
-  pass
+  classification: Optional[DataClassification] = Field(default=DataClassification.UNSPECIFIED)
 
 class PropertyAttribute(MetaSchemaModel):
   semantic_type: SemanticType
