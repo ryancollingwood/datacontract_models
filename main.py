@@ -33,7 +33,7 @@ def process_and_validate_capture_sheet(
     return True, validation_path
 
 
-def generate_capture_sheet_code(valid_path: Path, generated_file_stem: str) -> Path:
+def generate_capture_sheet_code(valid_path: Path, output_path: Path, generated_file_stem: str) -> Path:
     rows = load_capture_sheet_rows(valid_path)
     capture_sheet = parse_capture_sheet_rows(rows)
     generated_path = output_path / f"{generated_file_stem}.py"
@@ -54,7 +54,9 @@ def generate_capture_sheet_code(valid_path: Path, generated_file_stem: str) -> P
     return generated_path
 
 
-if __name__ == "__main__":
+def test_generate():
+    from rich import print
+
     Path("output").mkdir(parents=True, exist_ok=True)
     #output_path = Path("output") / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     output_path = Path("output")
@@ -71,7 +73,7 @@ if __name__ == "__main__":
         exit(1)
 
     generated_path = generate_capture_sheet_code(
-        valid_path, sluggify(input_file_path.stem)
+        valid_path, output_path, sluggify(input_file_path.stem)
     )
 
     print(generated_path)
@@ -93,3 +95,11 @@ if __name__ == "__main__":
         generated_path.read_text(), fast=False, mode=black.FileMode()
     )
     generated_path.write_text(out)
+
+if __name__ == "__main__":
+    from rich import print
+    test_generate()
+
+    from output.order_events import event_order_requested
+    contract = event_order_requested.to_contract()
+    print(contract)
