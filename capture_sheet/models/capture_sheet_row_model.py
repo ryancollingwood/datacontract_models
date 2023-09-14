@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from pydantic import Field, model_validator
 
-from models import Cardinality, SchemaType
+from models import Cardinality, SchemaType, DataClassification
 
 from .capture_sheet_base_model import CaptureSheetBaseModel
 
@@ -16,6 +16,7 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
     attribute: str
     attribute_cardinality: Cardinality
     semantic_type: str
+    data_classification: DataClassification = Field(default=DataClassification.UNSPECIFIED)
     schema_type: SchemaType
     column: Optional[str | None] = Field(default = None)
     table: Optional[str | None] = Field(default = None)

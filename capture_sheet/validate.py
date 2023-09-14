@@ -5,7 +5,7 @@ import pandas as pd
 from pydantic import ValidationError
 from .models.capture_sheet_row_model import CaptureSheetRowModel
 from .column_names import EVENT, RAISED_BY, RECEIVED_BY, ENTITY, ENTITY_CARDINALITY
-from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, SEMANTIC_TYPE, SCHEMA_TYPE
+from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, SEMANTIC_TYPE, SCHEMA_TYPE, DATA_CLASSIFICATION
 from .column_names import DATABASE, TABLE, COLUMN, NOT_NULL, IS_UNIQUE
 from .column_names import REFERENCE_COLUMN, REFERENCE_TABLE, REFERENCE_DATABASE 
 from .column_names import OUTCOME, RESULT
@@ -127,6 +127,12 @@ def validate_capture_sheet(df: pd.DataFrame):
 
     check_uniqueness(
         validate_df,
+        SEMANTIC_TYPE,
+        [DATA_CLASSIFICATION]
+    )
+
+    check_uniqueness(
+        validate_df,
         ATTRIBUTE,
         [
             EVENT,
@@ -137,6 +143,7 @@ def validate_capture_sheet(df: pd.DataFrame):
             ATTRIBUTE,
             ATTRIBUTE_CARDINALITY,
             SEMANTIC_TYPE,
+            DATA_CLASSIFICATION,
             SCHEMA_TYPE,
             COLUMN,
             TABLE,

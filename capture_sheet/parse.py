@@ -43,7 +43,10 @@ class CaptureSheetParser:
     def parse_row_property(self, row: CaptureSheetRowModel):
         semantic_type = row.semantic_type
         if not self.capture_sheet.is_present(semantic_type, self.capture_sheet.semantic_types):
-            self.capture_sheet.semantic_types[semantic_type] = SemanticType(name=semantic_type)
+            self.capture_sheet.semantic_types[semantic_type] = SemanticType(
+                name=semantic_type,
+                classification=row.data_classification,
+                )
 
         property_attribute = row.attribute
         if not self.capture_sheet.is_present(
