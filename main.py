@@ -13,6 +13,23 @@ from capture_sheet import (
 from common.str_utils import sluggify
 from refactoring import variable_extraction
 
+def processed_df_info(processed_df: pd.DataFrame) -> pd.DataFrame:
+
+    detected_dtypes_df = processed_df.convert_dtypes(
+        infer_objects=True,
+        convert_integer=True,
+        convert_string=True,
+        convert_boolean=True,
+        convert_floating=True,
+    ).dtypes.to_frame()
+    detected_dtypes_df.columns = ["datatype"]
+
+    summary_df = processed_df.describe(include="all").T
+
+    return detected_dtypes_df.join(
+        summary_df
+    ).reset_index().rename(columns={"index": "column"})
+
 
 def process_and_validate_capture_sheet(
     capture_sheet_path: Path, output_path: Path, sheet_name="Sheet1"
@@ -26,6 +43,10 @@ def process_and_validate_capture_sheet(
 
     processed_path = output_path / file_names.PROCESSED_CSV
     processed_df.to_csv(processed_path, index=False)
+
+    # provide more nuanched schema info for processed dataframe
+    detected_schema_path = output_path / file_names.DETECTED_SCHEMA
+    processed_df_info(processed_df).to_csv(detected_schema_path, index=False)
 
     if validation_df[column_names.OUTCOME].value_counts().get(False, 0) > 0:
         return False, validation_path

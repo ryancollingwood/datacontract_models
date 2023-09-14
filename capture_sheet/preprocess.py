@@ -37,6 +37,7 @@ def add_optional_columns(df: pd.DataFrame) -> pd.DataFrame:
 def preprocess_capture_sheet(df: pd.DataFrame) -> pd.DataFrame:
     df = add_optional_columns(df)
     df = df.replace({"": None})
+
     df.pipe(normalise_column_names).pipe(
         pascal_case_column_values, ENTITY_CARDINALITY
     ).pipe(pascal_case_column_values, ATTRIBUTE_CARDINALITY).pipe(
