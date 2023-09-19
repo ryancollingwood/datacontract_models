@@ -91,31 +91,35 @@ def check_uniqueness(
     except AssertionError as e:
         raise e
 
+def column_subset(df: pd.DataFrame, inclusive_start_col_name: str, exclusive_end_col_name: str):
+    columns: List[str] = list(df.columns)
+    start_index = columns.index(inclusive_start_col_name)
+    end_index = columns.index(exclusive_end_col_name)
+
+    if start_index == end_index:
+        return ValueError("Cannot get a column subset, columns have same index")
+    if end_index < start_index:
+        return ValueError("End column name is before start column name")
+    
+    return columns[start_index:end_index]
+
 
 def validate_capture_sheet(df: pd.DataFrame):
     validate_df = df.copy()
 
-    check_uniqueness(validate_df, EVENT, [EVENT, RAISED_BY, RECEIVED_BY])
+    check_uniqueness(validate_df, EVENT, column_subset(df, EVENT, ENTITY))
 
     check_uniqueness(
         validate_df,
         ENTITY,
-        [EVENT, RAISED_BY, RECEIVED_BY, ENTITY, ENTITY_CARDINALITY],
+        column_subset(df, EVENT, ATTRIBUTE),
         [EVENT],
     )
 
     check_uniqueness(
         validate_df,
         ATTRIBUTE,
-        [
-            EVENT,
-            RAISED_BY,
-            RECEIVED_BY,
-            ENTITY,
-            ENTITY,
-            ATTRIBUTE,
-            ATTRIBUTE_CARDINALITY,
-        ],
+        column_subset(df, EVENT, SEMANTIC_TYPE),
         [EVENT, ENTITY],
     )
 
@@ -134,26 +138,7 @@ def validate_capture_sheet(df: pd.DataFrame):
     check_uniqueness(
         validate_df,
         ATTRIBUTE,
-        [
-            EVENT,
-            RAISED_BY,
-            RECEIVED_BY,
-            ENTITY,
-            ENTITY_CARDINALITY,
-            ATTRIBUTE,
-            ATTRIBUTE_CARDINALITY,
-            SEMANTIC_TYPE,
-            DATA_CLASSIFICATION,
-            SCHEMA_TYPE,
-            COLUMN,
-            TABLE,
-            DATABASE,
-            NOT_NULL,
-            IS_UNIQUE,
-            REFERENCE_COLUMN,
-            REFERENCE_TABLE,
-            REFERENCE_DATABASE,
-        ],
+        list(df.columns),
         [EVENT, ENTITY],
     )
 
