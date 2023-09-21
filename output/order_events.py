@@ -183,6 +183,7 @@ event_order_requested = Event(
             aggregate=aggregate_order_items,
         ),
     ],
+    event_description="When a customer submits an order before supply payment details",
 )
 
 semantictype_currency_aud_excluding_tax = SemanticType(
@@ -365,6 +366,7 @@ event_order_confirmed = Event(
             aggregate=order_confirmed_order_items,
         ),
     ],
+    event_description="Once payment has been received and all validations of the customer details have been completed",
 )
 
 databasetable_adresses = DatabaseTable(name="adresses", database=database_super_pos)
@@ -428,4 +430,5 @@ event_customer_details_updated = Event(
             aggregate=aggregate_prioir_addresses,
         ),
     ],
+    event_description="When a customer updates their details",
 )
