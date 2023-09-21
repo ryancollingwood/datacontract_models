@@ -7,7 +7,8 @@ from .column_names import (
     ATTRIBUTE,
     DATA_CLASSIFICATION,
 )
-from .column_ranges import column_subset, resort_columns
+from .column_ranges import column_subset
+from .column_remapper import ColumnRemapper
 
 
 def normalise_column_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -43,8 +44,8 @@ def preprocess_capture_sheet(df: pd.DataFrame) -> pd.DataFrame:
         pascal_case_column_values, DATA_CLASSIFICATION
     )
 
-    df_columns = resort_columns(df.columns)
-    df = df[df_columns]
+    df_columns = ColumnRemapper(df.columns)
+    df = df[df_columns.sorted_columns]
 
     ffill_columns = column_subset(df, EVENT, ATTRIBUTE)
 
