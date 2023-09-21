@@ -3,6 +3,7 @@ from copy import deepcopy
 import json
 import pandas as pd
 from pydantic import ValidationError
+from .column_remapper import ColumnRemapper
 from .models.capture_sheet_row_model import CaptureSheetRowModel
 from .column_names import EVENT, RAISED_BY, RECEIVED_BY, ENTITY, ENTITY_CARDINALITY
 from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, SEMANTIC_TYPE, SCHEMA_TYPE, DATA_CLASSIFICATION
@@ -60,6 +61,8 @@ def check_uniqueness(
     """
     if partition_cols is not None:
         actual_partition = deepcopy(partition_cols)
+        if not isinstance(actual_partition, list):
+            actual_partition = list(actual_partition)
         if check_column not in actual_partition:
             actual_partition.append(check_column)
     else:
@@ -94,23 +97,24 @@ def check_uniqueness(
         raise e
     
 
-def validate_capture_sheet(df: pd.DataFrame):
+def validate_capture_sheet(df: pd.DataFrame, column_remapper: ColumnRemapper):
     validate_df = df.copy()
 
-    check_uniqueness(validate_df, EVENT, EVENT_COLUMNS)
+    check_uniqueness(validate_df, EVENT, column_remapper.event_columns)
 
     check_uniqueness(
         validate_df,
         ENTITY,
-        column_subset(df, EVENT_COLUMNS[0], ENTITY_COLUMNS[-1]),
+        column_remapper.event_columns + column_remapper.entity_columns,
+        #column_subset(df, EVENT_COLUMNS[0], ENTITY_COLUMNS[-1]),
         [EVENT],
     )
 
     check_uniqueness(
         validate_df,
         ATTRIBUTE,
-        # TODO
-        column_subset(df, EVENT_COLUMNS[0], ATTRIBUTE_COLUMNS[-1]),
+        column_remapper.event_columns + column_remapper.entity_columns + column_remapper.property_columns,
+        #column_subset(df, EVENT_COLUMNS[0], ATTRIBUTE_COLUMNS[-1]),
         [EVENT, ENTITY],
     )
 
@@ -139,7 +143,8 @@ def validate_capture_sheet(df: pd.DataFrame):
 
     check_uniqueness(
         validate_df, 'dbo',
-        [DATABASE, TABLE, COLUMN, SCHEMA_TYPE, NOT_NULL, IS_UNIQUE]
+        column_remapper.source_columns,
+        #[DATABASE, TABLE, COLUMN, SCHEMA_TYPE, NOT_NULL, IS_UNIQUE]
     )
 
     return validate_capture_sheet_model(validate_df)

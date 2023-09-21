@@ -44,27 +44,30 @@ class ColumnRemapper():
         
         self.column_map = result
         self.sorted_columns = all_columns
+
+    def _get_column_range(self, prefix: str):
+        return tuple(self.column_map[prefix])
     
     @property
     def event_columns(self):
-        return self.column_map[EVENT_PREFIX]
+        return self._get_column_range(EVENT_PREFIX)
     
     @property
     def entity_columns(self):
-        return self.column_map[ENTITY_PREFIX]
+        return self._get_column_range(ENTITY_PREFIX)
     
     @property
     def property_columns(self):
-        return self.column_map[PROPERTY_PREFIX]
+        return self._get_column_range(PROPERTY_PREFIX)
     
     @property
     def attribute_columns(self):
-        return self.column_map[ATTRIBUTE_PREFIX]
+        return self._get_column_range(ATTRIBUTE_PREFIX)
     
     @property
     def source_columns(self):
-        return self.column_map[SOURCE_PREFIX]
+        return self._get_column_range(SOURCE_PREFIX)
 
     @property
     def reference_columns(self):
-        return self.column_map[REFERENCE_PREFIX]
+        return self._get_column_range(REFERENCE_PREFIX)

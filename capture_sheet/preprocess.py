@@ -1,13 +1,11 @@
+from typing import Tuple
 import pandas as pd
 from common.str_utils import pascal_case
 from .column_names import (
     ENTITY_CARDINALITY,
     ATTRIBUTE_CARDINALITY,
-    EVENT,
-    ATTRIBUTE,
     DATA_CLASSIFICATION,
 )
-from .column_ranges import column_subset
 from .column_remapper import ColumnRemapper
 
 
@@ -28,13 +26,16 @@ def pascal_case_column_values(df: pd.DataFrame, column: str) -> pd.DataFrame:
 
 
 def add_optional_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add optional columns to the dataframe if they don't already exist
+    """
     for col in [DATA_CLASSIFICATION]:
         if col not in df.columns:
             df[col] = None
     return df
 
 
-def preprocess_capture_sheet(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_capture_sheet(df: pd.DataFrame) -> Tuple[pd.DataFrame, ColumnRemapper]:
     df = add_optional_columns(df)
     df = df.replace({"": None})
 
@@ -44,11 +45,11 @@ def preprocess_capture_sheet(df: pd.DataFrame) -> pd.DataFrame:
         pascal_case_column_values, DATA_CLASSIFICATION
     )
 
-    df_columns = ColumnRemapper(df.columns)
-    df = df[df_columns.sorted_columns]
+    column_remapper = ColumnRemapper(df.columns)
+    df = df[column_remapper.sorted_columns]
 
-    for ffill_cols in [df_columns.event_columns, df_columns.entity_columns]:
+    for ffill_cols in [column_remapper.event_columns, column_remapper.entity_columns]:
         for col in ffill_cols:
             df[col] = df[col].ffill()
 
-    return df
+    return df, column_remapper
