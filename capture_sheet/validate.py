@@ -9,6 +9,8 @@ from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, SEMANTIC_TYPE, SCHEM
 from .column_names import DATABASE, TABLE, COLUMN, NOT_NULL, IS_UNIQUE
 from .column_names import REFERENCE_COLUMN, REFERENCE_TABLE, REFERENCE_DATABASE 
 from .column_names import OUTCOME, RESULT
+from .column_ranges import column_subset
+from .column_ranges import EVENT_COLUMNS, ENTITY_COLUMNS, ATTRIBUTE_COLUMNS, SOURCE_COLUMNS, REFERENCE_COLUMNS
 
 def validate_df_row(row):
     try:
@@ -90,36 +92,25 @@ def check_uniqueness(
         assert max(check_counts) == 1, msg
     except AssertionError as e:
         raise e
-
-def column_subset(df: pd.DataFrame, inclusive_start_col_name: str, exclusive_end_col_name: str):
-    columns: List[str] = list(df.columns)
-    start_index = columns.index(inclusive_start_col_name)
-    end_index = columns.index(exclusive_end_col_name)
-
-    if start_index == end_index:
-        return ValueError("Cannot get a column subset, columns have same index")
-    if end_index < start_index:
-        return ValueError("End column name is before start column name")
     
-    return columns[start_index:end_index]
-
 
 def validate_capture_sheet(df: pd.DataFrame):
     validate_df = df.copy()
 
-    check_uniqueness(validate_df, EVENT, column_subset(df, EVENT, ENTITY))
+    check_uniqueness(validate_df, EVENT, EVENT_COLUMNS)
 
     check_uniqueness(
         validate_df,
         ENTITY,
-        column_subset(df, EVENT, ATTRIBUTE),
+        column_subset(df, EVENT_COLUMNS[0], ENTITY_COLUMNS[-1]),
         [EVENT],
     )
 
     check_uniqueness(
         validate_df,
         ATTRIBUTE,
-        column_subset(df, EVENT, SEMANTIC_TYPE),
+        # TODO
+        column_subset(df, EVENT_COLUMNS[0], ATTRIBUTE_COLUMNS[-1]),
         [EVENT, ENTITY],
     )
 

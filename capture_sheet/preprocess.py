@@ -4,11 +4,10 @@ from .column_names import (
     ENTITY_CARDINALITY,
     ATTRIBUTE_CARDINALITY,
     EVENT,
-    RAISED_BY,
-    RECEIVED_BY,
-    ENTITY,
+    ATTRIBUTE,
     DATA_CLASSIFICATION,
 )
+from .column_ranges import column_subset, resort_columns
 
 
 def normalise_column_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -44,7 +43,12 @@ def preprocess_capture_sheet(df: pd.DataFrame) -> pd.DataFrame:
         pascal_case_column_values, DATA_CLASSIFICATION
     )
 
-    for col in [EVENT, RAISED_BY, RECEIVED_BY, ENTITY, ENTITY_CARDINALITY]:
+    df_columns = resort_columns(df.columns)
+    df = df[df_columns]
+
+    ffill_columns = column_subset(df, EVENT, ATTRIBUTE)
+
+    for col in ffill_columns:
         df[col] = df[col].ffill()
 
     return df
