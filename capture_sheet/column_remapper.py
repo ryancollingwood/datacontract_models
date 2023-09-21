@@ -1,6 +1,7 @@
 from typing import List
 from collections import Counter
 from .column_ranges import COLUMN_MAP
+from .column_ranges import EVENT_PREFIX, ENTITY_PREFIX, PROPERTY_PREFIX, ATTRIBUTE_PREFIX, SOURCE_PREFIX, REFERENCE_PREFIX
 
 class ColumnRemapper():
     def __init__(self, columns: List[str]) -> None:
@@ -43,3 +44,27 @@ class ColumnRemapper():
         
         self.column_map = result
         self.sorted_columns = all_columns
+    
+    @property
+    def event_columns(self):
+        return self.column_map[EVENT_PREFIX]
+    
+    @property
+    def entity_columns(self):
+        return self.column_map[ENTITY_PREFIX]
+    
+    @property
+    def property_columns(self):
+        return self.column_map[PROPERTY_PREFIX]
+    
+    @property
+    def attribute_columns(self):
+        return self.column_map[ATTRIBUTE_PREFIX]
+    
+    @property
+    def source_columns(self):
+        return self.column_map[SOURCE_PREFIX]
+
+    @property
+    def reference_columns(self):
+        return self.column_map[REFERENCE_PREFIX]

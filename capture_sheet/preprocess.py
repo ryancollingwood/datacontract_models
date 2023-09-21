@@ -47,9 +47,8 @@ def preprocess_capture_sheet(df: pd.DataFrame) -> pd.DataFrame:
     df_columns = ColumnRemapper(df.columns)
     df = df[df_columns.sorted_columns]
 
-    ffill_columns = column_subset(df, EVENT, ATTRIBUTE)
-
-    for col in ffill_columns:
-        df[col] = df[col].ffill()
+    for ffill_cols in [df_columns.event_columns, df_columns.entity_columns]:
+        for col in ffill_cols:
+            df[col] = df[col].ffill()
 
     return df
