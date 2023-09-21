@@ -19,21 +19,14 @@ from models import SchemaType, Actor, Cardinality
 from .models.capture_sheet_model import CaptureSheetModel
 from .models.capture_sheet_row_model import CaptureSheetRowModel
 from .column_names import RESULT, OUTCOME
-
-@dataclass
-class LastEvent:
-    name: str
-    raised_by: Actor
-    received_by: Actor
-
-@dataclass
-class LastAggregate:
-    name: str
-    cardinality: Cardinality
+from .column_remapper import ColumnRemapper
+from .models.parse_models import LastEvent, LastAggregate
+from .file_names import COLUMN_REMAPPER_JSON
 
 class CaptureSheetParser:
-    def __init__(self, rows: List[CaptureSheetRowModel]) -> None:
+    def __init__(self, rows: List[CaptureSheetRowModel], column_remapper: ColumnRemapper) -> None:
         self.rows = rows
+        self.column_remapper = column_remapper
         self.capture_sheet = CaptureSheetModel()
         self.last_event: LastEvent = None
         self.last_aggregate: LastAggregate = None
@@ -52,9 +45,11 @@ class CaptureSheetParser:
         if not self.capture_sheet.is_present(
             property_attribute, self.capture_sheet.property_attributes
         ):
+            attribute_extra = {k:v for k,v in row.model_extra.items() if k in self.column_remapper.attribute_columns}
             self.capture_sheet.property_attributes[property_attribute] = PropertyAttribute(
                 name=property_attribute,
                 semantic_type=self.capture_sheet.semantic_types[semantic_type],
+                **attribute_extra,
             )
 
         database = row.database
@@ -79,9 +74,9 @@ class CaptureSheetParser:
                 references=None,
             )
 
-        return self.new_property(property_attribute, database_column, row.attribute_cardinality)
+        return self.new_property(row, property_attribute, database_column, row.attribute_cardinality)
 
-    def new_property(self, property_attribute, database_column, attribute_cardinality):
+    def new_property(self, row, property_attribute, database_column, attribute_cardinality):
         attribute = None
         source = None
         # TODO is_identifier
@@ -92,11 +87,13 @@ class CaptureSheetParser:
         if database_column is not None:
             source = self.capture_sheet.database_columns[database_column]
 
+        property_extra = {k:v for k,v in row.model_extra.items() if k in self.column_remapper.property_columns}
         return Property(
             attribute=attribute,
             source=source,
             cardinality=attribute_cardinality,
             is_identifier=is_identifier,
+            **property_extra,
         )
         
     def parse_row(self, row: CaptureSheetRowModel):        
@@ -118,15 +115,21 @@ class CaptureSheetParser:
         if self.last_event is not None and self.last_event.name != event_name:
             self.add_last_event()
 
+        event_extra = {k:v for k,v in row.model_extra.items() if k in self.column_remapper.event_columns}
+
         self.last_event = LastEvent(
             name = event_name,
             raised_by = self.capture_sheet.actors[raised_by],
             received_by = self.capture_sheet.actors[received_by],
+            **event_extra
         )
+
+        aggregate_extra = {k:v for k,v in row.model_extra.items() if k in self.column_remapper.entity_columns}
 
         self.last_aggregate = LastAggregate(
             name=aggregate_name,
             cardinality=aggregate_cardinality,
+            **aggregate_extra
         )
 
         self.property_buffer.append(self.parse_row_property(row))
@@ -141,6 +144,7 @@ class CaptureSheetParser:
                 raised_by = raised_by,
                 received_by = received_by,
                 aggregates = self.aggregate_buffer,
+                **self.last_event.model_extra,
             )
 
         self.capture_sheet.events[event_name] = new_event
@@ -190,8 +194,13 @@ def load_capture_sheet_rows(validation_path: Path, ignore_errors: bool = False):
     return [CaptureSheetRowModel(**x[RESULT]) for x in validation_data if x[OUTCOME]]
 
 
-def parse_capture_sheet_rows(rows: List[CaptureSheetRowModel]):
-    capture_sheet_parser = CaptureSheetParser(rows)
+def load_column_remapper(output_path: Path):
+    column_remapper_path = output_path / COLUMN_REMAPPER_JSON
+    return ColumnRemapper.model_validate(json.loads(column_remapper_path.read_text()))
+
+
+def parse_capture_sheet_rows(rows: List[CaptureSheetRowModel], column_remapper: ColumnRemapper):
+    capture_sheet_parser = CaptureSheetParser(rows, column_remapper)
     capture_sheet_parser.parse()
     return capture_sheet_parser.capture_sheet
 

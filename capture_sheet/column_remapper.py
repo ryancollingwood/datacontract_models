@@ -1,16 +1,15 @@
-from typing import List
+from typing import List, Dict
 from collections import Counter
+from pydantic import BaseModel, Field
 from .column_ranges import COLUMN_MAP
 from .column_ranges import EVENT_PREFIX, ENTITY_PREFIX, PROPERTY_PREFIX, ATTRIBUTE_PREFIX, SOURCE_PREFIX, REFERENCE_PREFIX
 
-class ColumnRemapper():
-    def __init__(self, columns: List[str]) -> None:
-        self.original_columns = columns
-        self.sorted_columns = list()
-        self.column_map = dict()
-        self._generate_column_map()
+class ColumnRemapper(BaseModel):
+    original_columns: List[str]
+    sorted_columns: List[str] = Field(default_factory=list)
+    column_map: dict = Field(default_factory=dict)
     
-    def _generate_column_map(self):
+    def generate_column_map(self):
         """
         Get the order of columns sorted so that they are in the order of:
         Event, Entity, Property, Attribute, Source, Reference. While keeping 

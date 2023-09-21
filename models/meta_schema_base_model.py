@@ -8,7 +8,7 @@ from .consts import NAME, OPTIONAL, MULTIPLE
 
 class MetaSchemaBaseModel(BaseModel):
     model_config: ConfigDict = ConfigDict(
-        anystr_strip_whitespace=True, anystr_lower=True, validate_all=True, extra=Extra.ignore,
+        anystr_strip_whitespace=True, anystr_lower=True, validate_all=True, extra=Extra.allow,
       )
 
     def get_meta_schema_label(value: "MetaSchemaBaseModel"):
@@ -35,7 +35,15 @@ class MetaSchemaBaseModel(BaseModel):
         return sluggify(label)
     
     def get_contract_items(self) -> Dict[str, Any]:
-        return self.__dict__
+        base_dict = self.__dict__
+        extra_dict = self.model_extra
+
+        base_single_dict = {k:v for k,v in base_dict.items() if not isinstance(v, list) and not isinstance(v, set) and not isinstance(v, dict)}
+        base_multiple_dict = {k:v for k,v in base_dict.items() if k not in base_single_dict}
+        extra_single_dict = {k:v for k,v in extra_dict.items() if not isinstance(v, list) and not isinstance(v, set) and not isinstance(v, dict)}
+        extra_multiple_dict = {k:v for k,v in extra_dict.items() if k not in extra_single_dict}
+
+        return base_single_dict | extra_single_dict | base_multiple_dict | extra_multiple_dict
     
     def to_contract(self, is_root: bool = True):
         def add_result(output, k, v):

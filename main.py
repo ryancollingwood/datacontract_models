@@ -1,3 +1,4 @@
+import json
 from typing import Tuple
 from pathlib import Path
 from datetime import datetime
@@ -10,6 +11,8 @@ from capture_sheet import (
     load_capture_sheet_rows,
     parse_capture_sheet_rows,
 )
+from capture_sheet.column_remapper import ColumnRemapper
+from capture_sheet.parse import load_column_remapper
 from common.str_utils import sluggify
 from refactoring import variable_extraction
 
@@ -30,33 +33,45 @@ def processed_df_info(processed_df: pd.DataFrame) -> pd.DataFrame:
         summary_df
     ).reset_index().rename(columns={"index": "column"})
 
+def get_validation_path(output_path: Path) -> Path:
+    return output_path / file_names.VALIDATION_JSON
+
+def get_column_remapper_path(output_path: Path) -> Path:
+    return output_path / file_names.COLUMN_REMAPPER_JSON
+
+def get_processed_path(output_path: Path) -> Path:
+    return output_path / file_names.PROCESSED_CSV
 
 def process_and_validate_capture_sheet(
     capture_sheet_path: Path, output_path: Path, sheet_name="Sheet1"
-) -> Tuple[bool, Path]:
+) -> bool:
     df = pd.read_excel(capture_sheet_path, sheet_name=sheet_name)
 
-    processed_df, validation_df = process_capture_sheet(df)
+    processed_df, validation_df, column_remapper = process_capture_sheet(df)
 
-    validation_path = output_path / file_names.VALIDATION_JSON
-    validation_df.to_json(validation_path, index=False, orient="records")
+    validation_path = get_validation_path(output_path)
+    validation_df.to_json(validation_path, index=False, orient="records", indent=2)
 
-    processed_path = output_path / file_names.PROCESSED_CSV
+    processed_path = get_processed_path(output_path)
     processed_df.to_csv(processed_path, index=False)
 
+    column_remapper_path = get_column_remapper_path(output_path)
+    column_remapper_path.write_text(column_remapper.model_dump_json(indent=2))
+                                    
     # provide more nuanched schema info for processed dataframe
     detected_schema_path = output_path / file_names.DETECTED_SCHEMA
     processed_df_info(processed_df).to_csv(detected_schema_path, index=False)
 
     if validation_df[column_names.OUTCOME].value_counts().get(False, 0) > 0:
-        return False, validation_path
+        return False
 
-    return True, validation_path
+    return True
 
 
 def generate_capture_sheet_code(valid_path: Path, output_path: Path, generated_file_stem: str) -> Path:
     rows = load_capture_sheet_rows(valid_path)
-    capture_sheet = parse_capture_sheet_rows(rows)
+    column_remapper = load_column_remapper(output_path)
+    capture_sheet = parse_capture_sheet_rows(rows, column_remapper)
     generated_path = output_path / f"{generated_file_stem}.py"
 
     if generated_path.exists():
@@ -85,9 +100,11 @@ def test_generate():
 
     input_file_path = Path("resources/Order Events.xlsx")
 
-    is_valid, valid_path = process_and_validate_capture_sheet(
+    is_valid = process_and_validate_capture_sheet(
         input_file_path, output_path, sheet_name="Sheet1"
     )
+
+    valid_path = get_validation_path(output_path)
 
     if not is_valid:
         print("Validation failed. Please fix errors and try again.")

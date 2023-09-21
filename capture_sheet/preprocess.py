@@ -45,7 +45,8 @@ def preprocess_capture_sheet(df: pd.DataFrame) -> Tuple[pd.DataFrame, ColumnRema
         pascal_case_column_values, DATA_CLASSIFICATION
     )
 
-    column_remapper = ColumnRemapper(df.columns)
+    column_remapper = ColumnRemapper(original_columns=list(df.columns))
+    column_remapper.generate_column_map()
     df = df[column_remapper.sorted_columns]
 
     for ffill_cols in [column_remapper.event_columns, column_remapper.entity_columns]:
