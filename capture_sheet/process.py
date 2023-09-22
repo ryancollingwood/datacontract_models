@@ -49,6 +49,8 @@ class CaptureSheetProcessor:
         result_df = preprocess_columns(result_df, [DATA_CLASSIFICATION])
 
         column_remapper = ColumnRemapper(original_columns=list(result_df.columns))
+        
+        result_df.rename(columns=column_remapper.renamed_columns, inplace=True)
         result_df = result_df[column_remapper.sorted_columns]
 
         result_df = ffill_sparse_cols(

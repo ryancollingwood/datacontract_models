@@ -31,6 +31,7 @@ propertyattribute_id = PropertyAttribute(
 propertyattribute_name = PropertyAttribute(
     name="name",
     semantic_type=semantictype_person_name,
+    alias="Customer Name",
 )
 propertyattribute_address_lines = PropertyAttribute(
     name="address lines",
@@ -47,6 +48,7 @@ propertyattribute_menu_description = PropertyAttribute(
 propertyattribute_variation = PropertyAttribute(
     name="variation",
     semantic_type=semantictype_product_variation,
+    alias="Modifications",
 )
 propertyattribute_quantity = PropertyAttribute(
     name="quantity",
@@ -183,7 +185,7 @@ event_order_requested = Event(
             aggregate=aggregate_order_items,
         ),
     ],
-    event_description="When a customer submits an order before supply payment details",
+    description="When a customer submits an order before supply payment details",
 )
 
 semantictype_currency_aud_excluding_tax = SemanticType(
@@ -366,7 +368,7 @@ event_order_confirmed = Event(
             aggregate=order_confirmed_order_items,
         ),
     ],
-    event_description="Once payment has been received and all validations of the customer details have been completed",
+    description="Once payment has been received and all validations of the customer details have been completed",
 )
 
 databasetable_adresses = DatabaseTable(name="adresses", database=database_super_pos)
@@ -430,5 +432,5 @@ event_customer_details_updated = Event(
             aggregate=aggregate_prioir_addresses,
         ),
     ],
-    event_description="When a customer updates their details",
+    description="When a customer updates their details",
 )
