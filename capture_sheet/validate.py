@@ -3,15 +3,8 @@ from copy import deepcopy
 import json
 import pandas as pd
 from pydantic import ValidationError
-from .column_remapper import ColumnRemapper
 from .models.capture_sheet_row_model import CaptureSheetRowModel
-from .column_names import EVENT, RAISED_BY, RECEIVED_BY, ENTITY, ENTITY_CARDINALITY
-from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, SEMANTIC_TYPE, SCHEMA_TYPE, DATA_CLASSIFICATION
-from .column_names import DATABASE, TABLE, COLUMN, NOT_NULL, IS_UNIQUE
-from .column_names import REFERENCE_COLUMN, REFERENCE_TABLE, REFERENCE_DATABASE 
 from .column_names import OUTCOME, RESULT
-from .column_ranges import column_subset
-from .column_ranges import EVENT_COLUMNS, ENTITY_COLUMNS, ATTRIBUTE_COLUMNS, SOURCE_COLUMNS, REFERENCE_COLUMNS
 
 def validate_df_row(row):
     try:
