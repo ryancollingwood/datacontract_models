@@ -59,17 +59,3 @@ def ffill_sparse_cols(df, column_groups: List[List[str]]):
             df[col] = df[col].ffill()
     return df
 
-
-def preprocess_capture_sheet(df: pd.DataFrame) -> Tuple[pd.DataFrame, ColumnRemapper]:
-    result_df = df.copy()
-    result_df = preprocess_columns(result_df, [DATA_CLASSIFICATION])
-
-    column_remapper = ColumnRemapper(original_columns=list(result_df.columns))
-    column_remapper.__generate_column_map()
-    result_df = result_df[column_remapper.sorted_columns]
-
-    result_df = ffill_sparse_cols(
-        result_df, [column_remapper.event_columns, column_remapper.entity_columns]
-    )
-
-    return result_df, column_remapper
