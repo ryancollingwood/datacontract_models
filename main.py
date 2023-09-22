@@ -8,14 +8,12 @@ from refactoring import variable_extraction
 from capture_sheet import CaptureSheetProcessor
 
 
-def test_generate():
-    Path("output").mkdir(parents=True, exist_ok=True)
-    output_path = Path("output")
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    input_file_path = Path("resources/Order Events.xlsx")
-    
-    csp = CaptureSheetProcessor(pd.read_excel(input_file_path, sheet_name="Sheet1"), output_path)
+def generate_code_from_capture_sheet(
+    input_file_path: Path, output_path: Path, sheet_name: str = "Sheet1"
+):
+    csp = CaptureSheetProcessor(
+        pd.read_excel(input_file_path, sheet_name=sheet_name), output_path
+    )
 
     if not csp.is_valid:
         print("Validation failed. Please fix errors and try again.")
@@ -24,7 +22,10 @@ def test_generate():
     generated_path = generate_capture_sheet_code(
         csp.validation_path, csp.output_path, sluggify(input_file_path.stem)
     )
+    return generated_path
 
+
+def refactor_generated_code(generated_path: Path):
     print(generated_path)
     variable_extraction(
         generated_path,
@@ -45,10 +46,22 @@ def test_generate():
     )
     generated_path.write_text(out)
 
+
 if __name__ == "__main__":
-    test_generate()
+    Path("output").mkdir(parents=True, exist_ok=True)
+    output_path = Path("output")
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    input_file_path = Path("resources/Order Events.xlsx")
+    sheet_name = "Sheet1"
+
+    generated_path = generate_code_from_capture_sheet(
+        input_file_path, output_path, sheet_name=sheet_name
+    )
+    refactor_generated_code(generated_path)
 
     # now this will be available for import after generation
     from output.order_events import event_order_requested
+
     contract = event_order_requested.to_contract()
     print(contract)
