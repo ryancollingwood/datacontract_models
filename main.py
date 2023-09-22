@@ -1,5 +1,6 @@
 from pathlib import Path
 import black
+import pandas as pd
 from capture_sheet import (
     file_names,
     load_capture_sheet_rows,
@@ -8,7 +9,7 @@ from capture_sheet import (
 from capture_sheet.parse import load_column_remapper
 from common.str_utils import sluggify
 from refactoring import variable_extraction
-from capture_sheet.process import CaptureSheetProcessor
+from capture_sheet import CaptureSheetProcessor
 
 
 def generate_capture_sheet_code(valid_path: Path, output_path: Path, generated_file_stem: str) -> Path:
@@ -42,7 +43,7 @@ def test_generate():
 
     input_file_path = Path("resources/Order Events.xlsx")
     
-    csp = CaptureSheetProcessor(input_file_path, output_path)
+    csp = CaptureSheetProcessor(pd.read_excel(input_file_path, sheet_name="Sheet1"), output_path)
     valid_path = file_names.get_validation_path(output_path)
 
     if not csp.is_valid:

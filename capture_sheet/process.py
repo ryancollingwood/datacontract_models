@@ -29,19 +29,23 @@ from .validate import (
 
 
 class CaptureSheetProcessor:
-    def __init__(self, in_path: Path, output_path: Path):
-        self.in_path = in_path
-        self.df = pd.read_excel(in_path, sheet_name="Sheet1")
+    def __init__(self, input_df: pd.DataFrame, output_path: Path):
+        self.input_df: pd.DataFrame = input_df
         self.output_path: Path = output_path
+
+        self.__processed_df: pd.DataFrame = None
         self.column_remapper: ColumnRemapper = None
 
-        # paths
-        self.detected_schema_path: Path = None
         self.processed_path: Path = None
+        self.column_remapper_path: Path = None
+        self.detected_schema_path: Path = None
+        self.validation_path: Path = None
+        self.is_valid: bool = None
+
         self.__process()
 
-    def preprocess_capture_sheet(self) -> pd.DataFrame:
-        result_df = self.df.copy()
+    def __preprocess_capture_sheet(self):
+        result_df = self.input_df.copy()
         result_df = preprocess_columns(result_df, [DATA_CLASSIFICATION])
 
         column_remapper = ColumnRemapper(original_columns=list(result_df.columns))
@@ -56,11 +60,16 @@ class CaptureSheetProcessor:
         self.processed_path = get_processed_path(self.output_path)
         result_df.to_csv(self.processed_path, index=False)
 
-        return result_df
+        column_remapper_path = get_column_remapper_path(self.output_path)
+        column_remapper_path.write_text(self.column_remapper.model_dump_json(indent=2))
+        self.column_remapper_path = column_remapper_path
 
-    def validate_capture_sheet(self, processed_df: pd.DataFrame) -> pd.DataFrame:
+        self.__processed_df = result_df
+
+
+    def __validate_capture_sheet(self):
         column_remapper = self.column_remapper
-        validate_df = processed_df.copy()
+        validate_df = self.__processed_df.copy()
 
         check_uniqueness(validate_df, EVENT, column_remapper.event_columns)
 
@@ -115,8 +124,12 @@ class CaptureSheetProcessor:
             self.validation_path, index=False, orient="records", indent=2
         )
 
-    def save_processed_df_info(self, processed_df: pd.DataFrame):
-        detected_dtypes_df = processed_df.convert_dtypes(
+        self.is_valid = validated_df[OUTCOME].value_counts().get(False, 0) == 0
+
+        return self.is_valid
+
+    def __infer_processed_df_schemo_info(self):
+        detected_dtypes_df = self.__processed_df.convert_dtypes(
             infer_objects=True,
             convert_integer=True,
             convert_string=True,
@@ -126,7 +139,7 @@ class CaptureSheetProcessor:
 
         detected_dtypes_df.columns = ["datatype"]
 
-        summary_df = processed_df.describe(include="all").T
+        summary_df = self.__processed_df.describe(include="all").T
 
         processed_info_df = (
             detected_dtypes_df.join(summary_df)
@@ -139,27 +152,16 @@ class CaptureSheetProcessor:
         processed_info_df.to_csv(self.detected_schema_path, index=False)
 
 
-    def __process(self) -> bool:
-        processed_df = self.preprocess_capture_sheet()
-        self.save_processed_df_info(processed_df)
-        validated_df = self.validate_capture_sheet(processed_df)
+    def __process(self) -> pd.DataFrame:
+        self.__preprocess_capture_sheet()
+        self.__infer_processed_df_schemo_info()
+        self.__validate_capture_sheet()
 
-        output_path = self.output_path
-
-        # TODO continue changing the paths to be the main
-        # export from this class
-        column_remapper_path = get_column_remapper_path(output_path)
-        column_remapper_path.write_text(self.column_remapper.model_dump_json(indent=2))
-
-        # provide more nuanched schema info for processed dataframe
-        detected_schema_path = get_detected_schema_path(output_path)
-        self.processed_info_df.to_csv(detected_schema_path, index=False)
-
-
+    
     @property
-    def is_valid(self) -> bool:
-        if self.validated_df[OUTCOME].value_counts().get(False, 0) > 0:
-            return False
-
-        return True
+    def output_df(self) -> pd.DataFrame:
+        if self.is_valid:
+            return self.__processed_df.copy()
+        else:
+            return None
 
