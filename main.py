@@ -1,9 +1,7 @@
 from pathlib import Path
 import black
 import pandas as pd
-from capture_sheet import (
-    file_names
-)
+from rich import print
 from capture_sheet.generate_code import generate_capture_sheet_code
 from common.str_utils import sluggify
 from refactoring import variable_extraction
@@ -11,8 +9,6 @@ from capture_sheet import CaptureSheetProcessor
 
 
 def test_generate():
-    from rich import print
-
     Path("output").mkdir(parents=True, exist_ok=True)
     output_path = Path("output")
     output_path.mkdir(parents=True, exist_ok=True)
@@ -50,9 +46,9 @@ def test_generate():
     generated_path.write_text(out)
 
 if __name__ == "__main__":
-    from rich import print
     test_generate()
 
+    # now this will be available for import after generation
     from output.order_events import event_order_requested
     contract = event_order_requested.to_contract()
     print(contract)
