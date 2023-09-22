@@ -157,8 +157,3 @@ class CaptureSheetProcessor:
 
         return True
 
-
-def process_capture_sheet(df) -> Tuple[pd.DataFrame, pd.DataFrame, ColumnRemapper]:
-    df, column_remapper = preprocess_capture_sheet(df)
-    validation_df = validate_capture_sheet(df, column_remapper).reset_index()
-    return df, validation_df, column_remapper
