@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 import pandas as pd
 from common.str_utils import pascal_case
 from .column_names import (
@@ -6,7 +6,6 @@ from .column_names import (
     ATTRIBUTE_CARDINALITY,
     DATA_CLASSIFICATION,
 )
-from .column_remapper import ColumnRemapper
 
 
 def normalise_column_names(df: pd.DataFrame) -> pd.DataFrame:

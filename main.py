@@ -2,36 +2,12 @@ from pathlib import Path
 import black
 import pandas as pd
 from capture_sheet import (
-    file_names,
-    load_capture_sheet_rows,
-    parse_capture_sheet_rows,
+    file_names
 )
-from capture_sheet.parse import load_column_remapper
+from capture_sheet.generate_code import generate_capture_sheet_code
 from common.str_utils import sluggify
 from refactoring import variable_extraction
 from capture_sheet import CaptureSheetProcessor
-
-
-def generate_capture_sheet_code(valid_path: Path, output_path: Path, generated_file_stem: str) -> Path:
-    rows = load_capture_sheet_rows(valid_path)
-    column_remapper = load_column_remapper(output_path)
-    capture_sheet = parse_capture_sheet_rows(rows, column_remapper)
-    generated_path = output_path / f"{generated_file_stem}.py"
-
-    if generated_path.exists():
-        print(f"WARNING: {generated_path} already exists and will be overwritten.")
-
-    with open(generated_path, "w") as f:
-        f.write("from models import *\n\n")
-        for event_name, event_data in capture_sheet.events.items():
-            f.write(f"event_{sluggify(event_name)} = {event_data.__repr__()}\n\n")
-
-    out = black.format_file_contents(
-        generated_path.read_text(), fast=False, mode=black.FileMode()
-    )
-    generated_path.write_text(out)
-
-    return generated_path
 
 
 def test_generate():
@@ -44,14 +20,13 @@ def test_generate():
     input_file_path = Path("resources/Order Events.xlsx")
     
     csp = CaptureSheetProcessor(pd.read_excel(input_file_path, sheet_name="Sheet1"), output_path)
-    valid_path = file_names.get_validation_path(output_path)
 
     if not csp.is_valid:
         print("Validation failed. Please fix errors and try again.")
         exit(1)
 
     generated_path = generate_capture_sheet_code(
-        valid_path, output_path, sluggify(input_file_path.stem)
+        csp.validation_path, csp.output_path, sluggify(input_file_path.stem)
     )
 
     print(generated_path)

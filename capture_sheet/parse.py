@@ -177,29 +177,3 @@ class CaptureSheetParser:
         return self.capture_sheet
 
 
-
-def load_capture_sheet_rows(validation_path: Path, ignore_errors: bool = False):
-    validation_data = json.loads(validation_path.read_text())
-    error_rows = [x[RESULT] for x in validation_data if not x[OUTCOME]]
-
-    if len(error_rows) > 0:
-        if ignore_errors:
-            print(
-                f"WARNING: {len(error_rows)} rows failed validation and will be ignored."
-            )
-        else:
-            raise Exception(f"{len(error_rows)} rows failed validation.")
-
-    return [CaptureSheetRowModel(**x[RESULT]) for x in validation_data if x[OUTCOME]]
-
-
-def load_column_remapper(output_path: Path):
-    column_remapper_path = output_path / COLUMN_REMAPPER_JSON
-    return ColumnRemapper.model_validate(json.loads(column_remapper_path.read_text()))
-
-
-def parse_capture_sheet_rows(rows: List[CaptureSheetRowModel], column_remapper: ColumnRemapper):
-    capture_sheet_parser = CaptureSheetParser(rows, column_remapper)
-    capture_sheet_parser.parse()
-    return capture_sheet_parser.capture_sheet
-
