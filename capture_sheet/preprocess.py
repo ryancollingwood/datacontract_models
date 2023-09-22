@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple
 import pandas as pd
 from common.str_utils import pascal_case
 from .column_names import (
@@ -25,32 +25,51 @@ def pascal_case_column_values(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return df
 
 
-def add_optional_columns(df: pd.DataFrame) -> pd.DataFrame:
+def add_optional_columns(df: pd.DataFrame, optional_columns: List[str]) -> pd.DataFrame:
     """
     Add optional columns to the dataframe if they don't already exist
     """
-    for col in [DATA_CLASSIFICATION]:
+    for col in optional_columns:
         if col not in df.columns:
             df[col] = None
     return df
 
 
-def preprocess_capture_sheet(df: pd.DataFrame) -> Tuple[pd.DataFrame, ColumnRemapper]:
-    df = add_optional_columns(df)
-    df = df.replace({"": None})
+def preprocess_columns(
+    df: pd.DataFrame, optional_columns: List[str] = None
+) -> pd.DataFrame:
+    result_df = df.copy()
 
-    df.pipe(normalise_column_names).pipe(
+    if optional_columns is not None:
+        result_df = add_optional_columns(result_df, optional_columns)
+    result_df = result_df.replace({"": None})
+
+    result_df.pipe(normalise_column_names).pipe(
         pascal_case_column_values, ENTITY_CARDINALITY
     ).pipe(pascal_case_column_values, ATTRIBUTE_CARDINALITY).pipe(
         pascal_case_column_values, DATA_CLASSIFICATION
     )
 
-    column_remapper = ColumnRemapper(original_columns=list(df.columns))
-    column_remapper.generate_column_map()
-    df = df[column_remapper.sorted_columns]
+    return result_df
 
-    for ffill_cols in [column_remapper.event_columns, column_remapper.entity_columns]:
+
+def ffill_sparse_cols(df, column_groups: List[List[str]]):
+    for ffill_cols in column_groups:
         for col in ffill_cols:
             df[col] = df[col].ffill()
+    return df
 
-    return df, column_remapper
+
+def preprocess_capture_sheet(df: pd.DataFrame) -> Tuple[pd.DataFrame, ColumnRemapper]:
+    result_df = df.copy()
+    result_df = preprocess_columns(result_df, [DATA_CLASSIFICATION])
+
+    column_remapper = ColumnRemapper(original_columns=list(result_df.columns))
+    column_remapper.__generate_column_map()
+    result_df = result_df[column_remapper.sorted_columns]
+
+    result_df = ffill_sparse_cols(
+        result_df, [column_remapper.event_columns, column_remapper.entity_columns]
+    )
+
+    return result_df, column_remapper

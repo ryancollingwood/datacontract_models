@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 import json
-from dataclasses import dataclass
 from models import (
     SemanticType,
     PropertyAttribute,
@@ -14,7 +13,7 @@ from models import (
     EventAggregate,
     Event,
 )
-from models import SchemaType, Actor, Cardinality
+from models import Actor
 
 from .models.capture_sheet_model import CaptureSheetModel
 from .models.capture_sheet_row_model import CaptureSheetRowModel

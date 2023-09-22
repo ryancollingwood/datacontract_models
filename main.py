@@ -15,57 +15,7 @@ from capture_sheet.column_remapper import ColumnRemapper
 from capture_sheet.parse import load_column_remapper
 from common.str_utils import sluggify
 from refactoring import variable_extraction
-
-def processed_df_info(processed_df: pd.DataFrame) -> pd.DataFrame:
-
-    detected_dtypes_df = processed_df.convert_dtypes(
-        infer_objects=True,
-        convert_integer=True,
-        convert_string=True,
-        convert_boolean=True,
-        convert_floating=True,
-    ).dtypes.to_frame()
-    detected_dtypes_df.columns = ["datatype"]
-
-    summary_df = processed_df.describe(include="all").T
-
-    return detected_dtypes_df.join(
-        summary_df
-    ).reset_index().rename(columns={"index": "column"})
-
-def get_validation_path(output_path: Path) -> Path:
-    return output_path / file_names.VALIDATION_JSON
-
-def get_column_remapper_path(output_path: Path) -> Path:
-    return output_path / file_names.COLUMN_REMAPPER_JSON
-
-def get_processed_path(output_path: Path) -> Path:
-    return output_path / file_names.PROCESSED_CSV
-
-def process_and_validate_capture_sheet(
-    capture_sheet_path: Path, output_path: Path, sheet_name="Sheet1"
-) -> bool:
-    df = pd.read_excel(capture_sheet_path, sheet_name=sheet_name)
-
-    processed_df, validation_df, column_remapper = process_capture_sheet(df)
-
-    validation_path = get_validation_path(output_path)
-    validation_df.to_json(validation_path, index=False, orient="records", indent=2)
-
-    processed_path = get_processed_path(output_path)
-    processed_df.to_csv(processed_path, index=False)
-
-    column_remapper_path = get_column_remapper_path(output_path)
-    column_remapper_path.write_text(column_remapper.model_dump_json(indent=2))
-                                    
-    # provide more nuanched schema info for processed dataframe
-    detected_schema_path = output_path / file_names.DETECTED_SCHEMA
-    processed_df_info(processed_df).to_csv(detected_schema_path, index=False)
-
-    if validation_df[column_names.OUTCOME].value_counts().get(False, 0) > 0:
-        return False
-
-    return True
+from capture_sheet.process import CaptureSheetProcessor
 
 
 def generate_capture_sheet_code(valid_path: Path, output_path: Path, generated_file_stem: str) -> Path:
@@ -94,19 +44,15 @@ def test_generate():
     from rich import print
 
     Path("output").mkdir(parents=True, exist_ok=True)
-    #output_path = Path("output") / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     output_path = Path("output")
     output_path.mkdir(parents=True, exist_ok=True)
 
     input_file_path = Path("resources/Order Events.xlsx")
+    
+    csp = CaptureSheetProcessor(input_file_path, output_path)
+    valid_path = file_names.get_validation_path(output_path)
 
-    is_valid = process_and_validate_capture_sheet(
-        input_file_path, output_path, sheet_name="Sheet1"
-    )
-
-    valid_path = get_validation_path(output_path)
-
-    if not is_valid:
+    if not csp.is_valid:
         print("Validation failed. Please fix errors and try again.")
         exit(1)
 

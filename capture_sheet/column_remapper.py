@@ -8,8 +8,12 @@ class ColumnRemapper(BaseModel):
     original_columns: List[str]
     sorted_columns: List[str] = Field(default_factory=list)
     column_map: dict = Field(default_factory=dict)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__generate_column_map()
     
-    def generate_column_map(self):
+    def __generate_column_map(self):
         """
         Get the order of columns sorted so that they are in the order of:
         Event, Entity, Property, Attribute, Source, Reference. While keeping 
@@ -44,29 +48,30 @@ class ColumnRemapper(BaseModel):
         self.column_map = result
         self.sorted_columns = all_columns
 
-    def _get_column_range(self, prefix: str):
+
+    def __get_column_range(self, prefix: str):
         return tuple(self.column_map[prefix])
     
     @property
     def event_columns(self):
-        return self._get_column_range(EVENT_PREFIX)
+        return self.__get_column_range(EVENT_PREFIX)
     
     @property
     def entity_columns(self):
-        return self._get_column_range(ENTITY_PREFIX)
+        return self.__get_column_range(ENTITY_PREFIX)
     
     @property
     def property_columns(self):
-        return self._get_column_range(PROPERTY_PREFIX)
+        return self.__get_column_range(PROPERTY_PREFIX)
     
     @property
     def attribute_columns(self):
-        return self._get_column_range(ATTRIBUTE_PREFIX)
+        return self.__get_column_range(ATTRIBUTE_PREFIX)
     
     @property
     def source_columns(self):
-        return self._get_column_range(SOURCE_PREFIX)
+        return self.__get_column_range(SOURCE_PREFIX)
 
     @property
     def reference_columns(self):
-        return self._get_column_range(REFERENCE_PREFIX)
+        return self.__get_column_range(REFERENCE_PREFIX)
