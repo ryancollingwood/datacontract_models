@@ -53,14 +53,21 @@ class ColumnRemapper(BaseModel):
             for column in column_range:
                 # rename custom columns so that they don't have the prefix
                 if column.startswith(prefix) and column not in COLUMN_MAP[prefix]:
-                    renamed_columns[column] = column[len(prefix):]
+                    # if we already have a match for column without the prefix
+                    # then we need to keep the prefix as it is a duplicate
+                    # i.e. first in the list wins
+                    column_without_prefix = column[len(prefix):]
+                    if column_without_prefix not in renamed_sorted_columns:
+                        renamed_columns[column] = column_without_prefix
+                    else:
+                        renamed_columns[column] = column
                 else:
                     renamed_columns[column] = column
                 
                 replacement_range.append(renamed_columns[column])
+                renamed_sorted_columns.append(renamed_columns[column])
 
             result[prefix] = replacement_range
-            renamed_sorted_columns.extend(replacement_range)
  
         self.sorted_columns = renamed_sorted_columns
         self.renamed_columns = renamed_columns
