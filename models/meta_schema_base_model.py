@@ -86,11 +86,9 @@ class MetaSchemaBaseModel(BaseModel):
                 raise ValueError(f"Duplicate key in output: {k_saved}")
             
         do_flatten = False
-        try:
+        if isinstance(self, MetaSchemaModel):
             do_flatten = isinstance(v_saved, dict) and self._to_contract_flatten_model
-        except AttributeError:
-            pass
-            
+
         if do_flatten:
             for key, value in v_saved.items():
                 output = self.add_contract_detail(output, key, value)
@@ -114,11 +112,13 @@ class MetaSchemaBaseModel(BaseModel):
                 continue
             elif isinstance(v, Enum):
                 result = self.add_contract_detail(result, k, str(v.value))
+                continue
             elif isinstance(v, list) or isinstance(v, set):
                 element_types = [isinstance(x, MetaSchemaContainerModel) for x in v]
                 if all(element_types):
                     result = self.add_contract_detail(result, k, {x.get_meta_schema_label():x.to_contract(is_root=False) for x in v})
-
+                    continue
+                
             if k not in result:
                 if isinstance(v, MetaSchemaModel):
                     base_model_contract = v.to_contract(is_root=False)
@@ -131,6 +131,8 @@ class MetaSchemaBaseModel(BaseModel):
                         result = self.add_contract_detail(result, k, base_model_contract)
                 else:
                     result = self.add_contract_detail(result, k, v)
+            else:
+                raise ValueError(f"Duplicate key in output: {k}")
         
         # in the case of "value object"
         # i.e. it only had a single property which was
