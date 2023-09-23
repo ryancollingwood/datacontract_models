@@ -120,6 +120,12 @@ class CaptureSheetProcessor:
             column_remapper.source_columns,
         )
 
+        check_uniqueness(
+            validate_df,
+            "dbo",
+            column_remapper.reference_columns,
+        )
+
         validated_df = validate_capture_sheet_model(validate_df).reset_index()
         self.validation_path = get_validation_path(self.output_path)
         validated_df.to_json(
