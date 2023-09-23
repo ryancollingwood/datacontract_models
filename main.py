@@ -1,92 +1,41 @@
-from typing import Tuple
 from pathlib import Path
-from datetime import datetime
 import black
 import pandas as pd
-from capture_sheet import (
-    process_capture_sheet,
-    column_names,
-    file_names,
-    load_capture_sheet_rows,
-    parse_capture_sheet_rows,
-)
+from rich import print
+from capture_sheet.generate_code import generate_capture_sheet_code
 from common.str_utils import sluggify
 from refactoring import variable_extraction
+from capture_sheet import CaptureSheetProcessor
+from models import SemanticType, PropertyAttribute, Database, DatabaseTable, DatabaseColumn, PropertyAttribute, Aggregate
 
-
-def process_and_validate_capture_sheet(
-    capture_sheet_path: Path, output_path: Path, sheet_name="Sheet1"
-) -> Tuple[bool, Path]:
-    df = pd.read_excel(capture_sheet_path, sheet_name=sheet_name)
-
-    processed_df, validation_df = process_capture_sheet(df)
-
-    validation_path = output_path / file_names.VALIDATION_JSON
-    validation_df.to_json(validation_path, index=False, orient="records")
-
-    processed_path = output_path / file_names.PROCESSED_CSV
-    processed_df.to_csv(processed_path, index=False)
-
-    if validation_df[column_names.OUTCOME].value_counts().get(False, 0) > 0:
-        return False, validation_path
-
-    return True, validation_path
-
-
-def generate_capture_sheet_code(valid_path: Path, output_path: Path, generated_file_stem: str) -> Path:
-    rows = load_capture_sheet_rows(valid_path)
-    capture_sheet = parse_capture_sheet_rows(rows)
-    generated_path = output_path / f"{generated_file_stem}.py"
-
-    if generated_path.exists():
-        print(f"WARNING: {generated_path} already exists and will be overwritten.")
-
-    with open(generated_path, "w") as f:
-        f.write("from models import *\n\n")
-        for event_name, event_data in capture_sheet.events.items():
-            f.write(f"event_{sluggify(event_name)} = {event_data.__repr__()}\n\n")
-
-    out = black.format_file_contents(
-        generated_path.read_text(), fast=False, mode=black.FileMode()
-    )
-    generated_path.write_text(out)
-
-    return generated_path
-
-
-def test_generate():
-    from rich import print
-
-    Path("output").mkdir(parents=True, exist_ok=True)
-    #output_path = Path("output") / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    output_path = Path("output")
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    input_file_path = Path("resources/Order Events.xlsx")
-
-    is_valid, valid_path = process_and_validate_capture_sheet(
-        input_file_path, output_path, sheet_name="Sheet1"
+def generate_code_from_capture_sheet(
+    input_file_path: Path, output_path: Path, sheet_name: str = "Sheet1"
+):
+    csp = CaptureSheetProcessor(
+        pd.read_excel(input_file_path, sheet_name=sheet_name), output_path
     )
 
-    if not is_valid:
+    if not csp.is_valid:
         print("Validation failed. Please fix errors and try again.")
         exit(1)
 
     generated_path = generate_capture_sheet_code(
-        valid_path, output_path, sluggify(input_file_path.stem)
+        csp.validation_path, csp.output_path, sluggify(input_file_path.stem)
     )
+    return generated_path
 
-    print(generated_path)
+
+def refactor_generated_code(generated_path: Path):
     variable_extraction(
         generated_path,
         [
-            "SemanticType",
-            "PropertyAttribute",
-            "Database",
-            "DatabaseTable",
-            "DatabaseColumn",
-            "PropertyAttribute",
-            "Aggregate",
+            SemanticType.__name__,
+            PropertyAttribute.__name__,
+            Database.__name__,
+            DatabaseTable.__name__,
+            DatabaseColumn.__name__,
+            PropertyAttribute.__name__,
+            Aggregate.__name__,
         ],
         debug=True,
     )
@@ -96,10 +45,22 @@ def test_generate():
     )
     generated_path.write_text(out)
 
-if __name__ == "__main__":
-    from rich import print
-    test_generate()
 
+if __name__ == "__main__":
+    Path("output").mkdir(parents=True, exist_ok=True)
+    output_path = Path("output")
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    input_file_path = Path("resources/Order Events.xlsx")
+    sheet_name = "Sheet1"
+
+    generated_path = generate_code_from_capture_sheet(
+        input_file_path, output_path, sheet_name=sheet_name
+    )
+    refactor_generated_code(generated_path)
+
+    # now this will be available for import after generation
     from output.order_events import event_order_requested
+
     contract = event_order_requested.to_contract()
     print(contract)

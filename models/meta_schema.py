@@ -11,6 +11,7 @@ class SemanticType(MetaSchemaModel):
   classification: Optional[DataClassification] = Field(default=DataClassification.UNSPECIFIED)
 
 class PropertyAttribute(MetaSchemaModel):
+  _to_contract_flatten_model: bool = True
   semantic_type: SemanticType
 
 class Database(MetaSchemaModel):
