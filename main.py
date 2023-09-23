@@ -26,7 +26,6 @@ def generate_code_from_capture_sheet(
 
 
 def refactor_generated_code(generated_path: Path):
-    print(generated_path)
     variable_extraction(
         generated_path,
         [
