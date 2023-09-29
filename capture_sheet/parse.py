@@ -64,17 +64,7 @@ class CaptureSheetParser:
 
         database_column = row.column
         if not self.capture_sheet.dbo_is_present(database, database_table, database_column):
-            reference = None
-            reference_database = row.reference_database
-            reference_table = row.reference_table
-            reference_column = row.reference_column
-
-            if all([reference_database, reference_table, reference_column]):
-                reference = DatabasePath(
-                    database=reference_database,
-                    table=reference_table,
-                    column=reference_column,
-                )
+            reference = self.extract_database_reference(row)
 
             self.capture_sheet.database_columns[database_column] = DatabaseColumn(
                 name=database_column,
@@ -86,6 +76,26 @@ class CaptureSheetParser:
             )
 
         return self.new_property(row, property_attribute, database_column, row.attribute_cardinality)
+
+    def extract_database_reference(self, row: CaptureSheetRowModel):
+        reference = None
+        reference_database = row.reference_database
+        reference_table = row.reference_table
+        reference_column = row.reference_column
+
+        if all([reference_database, reference_table, reference_column]):
+            reference = DatabasePath(
+                    database=reference_database,
+                    table=reference_table,
+                    column=reference_column,
+                )
+            
+            if self.capture_sheet.is_present(reference.name, self.capture_sheet.database_references):
+                reference = self.capture_sheet.database_references[reference.name]
+            else:
+                self.capture_sheet.database_references[reference.name] = reference
+            
+        return reference
 
     def new_property(self, row, property_attribute, database_column, attribute_cardinality):
         attribute = None
