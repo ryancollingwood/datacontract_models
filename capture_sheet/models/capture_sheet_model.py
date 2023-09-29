@@ -7,7 +7,7 @@ from models import (
     Database,
     DatabaseTable,
     DatabaseColumn,
-    SchemaType,
+    DatabasePath,
     Aggregate,
     Property,
     EventAggregate,
@@ -15,7 +15,6 @@ from models import (
 )
 
 from .capture_sheet_base_model import CaptureSheetBaseModel
-from .capture_sheet_row_model import CaptureSheetRowModel
 
 
 class CaptureSheetModel(CaptureSheetBaseModel):
@@ -25,6 +24,7 @@ class CaptureSheetModel(CaptureSheetBaseModel):
     databases: Dict[str, Database] = dict()
     database_tables: Dict[str, DatabaseTable] = dict()
     database_columns: Dict[str, DatabaseColumn] = dict()
+    database_references: Dict[str, DatabasePath] = dict()
     properties: Dict[str, Property] = dict()
     aggregates: Dict[str, Aggregate] = dict()
     event_aggregates: Dict[str, EventAggregate] = dict()
