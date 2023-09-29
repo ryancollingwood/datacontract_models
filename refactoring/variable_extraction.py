@@ -11,7 +11,11 @@ from .ast_node_utils import dump_node_detail, unparse, walk_filter, get_node_sta
 
 
 def get_node_replacement_var_name(node: ast.AST, var_prefix: str):
-    var_name_suffix = sluggify(node.value.keywords[0].value.value)
+    name_keyword = [x for x in node.value.keywords if x.arg == "name"]
+    if len(name_keyword) == 1:
+        var_name_suffix = sluggify(name_keyword[0].value.value)
+    else:
+        var_name_suffix = sluggify(" ".join([x.value.value for x in node.value.keywords if isinstance(x.value.value, str)]))
     return f"{sluggify(var_prefix)}_{var_name_suffix}"
 
 
