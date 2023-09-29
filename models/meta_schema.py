@@ -1,5 +1,5 @@
-from typing import List, Optional, Dict, Any
-from pydantic import Field, validator
+from typing import List, Optional
+from pydantic import Field
 
 from .schema_type import SchemaType
 from .cardinality import Cardinality
