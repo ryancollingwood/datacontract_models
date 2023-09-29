@@ -8,6 +8,7 @@ from .meta_schema import (
     Property,
     Aggregate,
     EventAggregate,
+    DatabasePath,
     Database,
     DatabaseTable,
     DatabaseColumn,

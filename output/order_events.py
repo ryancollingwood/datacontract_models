@@ -54,6 +54,20 @@ propertyattribute_quantity = PropertyAttribute(
     name="quantity",
     semantic_type=semantictype_product_quantity,
 )
+databasepath_super_pos_customers_id = DatabasePath(
+    database="super_pos", table="customers", column="id"
+)
+databasepath_super_pos_customers_first_name = DatabasePath(
+    database="super_pos",
+    table="customers",
+    column="first_name",
+)
+databasepath_super_pos_adresses_id = DatabasePath(
+    database="super_pos", table="adresses", column="id"
+)
+databasepath_super_pos_products_id = DatabasePath(
+    database="super_pos", table="products", column="id"
+)
 database_super_pos = Database(name="super_pos")
 databasetable_orders = DatabaseTable(name="orders", database=database_super_pos)
 databasecolumn_customer_id = DatabaseColumn(
@@ -62,7 +76,7 @@ databasecolumn_customer_id = DatabaseColumn(
     schema_type=SchemaType.GUID,
     not_null=True,
     is_unique=True,
-    references=None,
+    references=databasepath_super_pos_customers_id,
 )
 databasecolumn_customer_first_name = DatabaseColumn(
     name="customer_first_name",
@@ -70,7 +84,7 @@ databasecolumn_customer_first_name = DatabaseColumn(
     schema_type=SchemaType.STR,
     not_null=True,
     is_unique=False,
-    references=None,
+    references=databasepath_super_pos_customers_first_name,
 )
 databasecolumn_address_id = DatabaseColumn(
     name="address_id",
@@ -78,7 +92,7 @@ databasecolumn_address_id = DatabaseColumn(
     schema_type=SchemaType.GUID,
     not_null=True,
     is_unique=False,
-    references=None,
+    references=databasepath_super_pos_adresses_id,
 )
 databasecolumn_product_id = DatabaseColumn(
     name="product_id",
@@ -86,7 +100,7 @@ databasecolumn_product_id = DatabaseColumn(
     schema_type=SchemaType.GUID,
     not_null=True,
     is_unique=False,
-    references=None,
+    references=databasepath_super_pos_products_id,
 )
 databasecolumn_variation = DatabaseColumn(
     name="variation",
@@ -372,6 +386,14 @@ event_order_confirmed = Event(
 )
 
 databasetable_adresses = DatabaseTable(name="adresses", database=database_super_pos)
+customer_details_updated_current_address_id = DatabaseColumn(
+    name="id",
+    table=databasetable_adresses,
+    schema_type=SchemaType.GUID,
+    not_null=True,
+    is_unique=True,
+    references=databasepath_super_pos_adresses_id,
+)
 databasecolumn_line_ = DatabaseColumn(
     name="line_1",
     table=databasetable_adresses,
@@ -386,7 +408,7 @@ aggregate_current_address = Aggregate(
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
-            source=databasecolumn_id,
+            source=customer_details_updated_current_address_id,
             is_identifier=False,
         ),
         Property(
@@ -403,7 +425,7 @@ aggregate_prioir_addresses = Aggregate(
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
-            source=databasecolumn_id,
+            source=customer_details_updated_current_address_id,
             is_identifier=False,
         ),
         Property(

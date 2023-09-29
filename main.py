@@ -6,7 +6,17 @@ from capture_sheet.generate_code import generate_capture_sheet_code
 from common.str_utils import sluggify
 from refactoring import variable_extraction
 from capture_sheet import CaptureSheetProcessor
-from models import SemanticType, PropertyAttribute, Database, DatabaseTable, DatabaseColumn, PropertyAttribute, Aggregate
+from models import (
+    SemanticType,
+    PropertyAttribute,
+    DatabasePath,
+    Database,
+    DatabaseTable,
+    DatabaseColumn,
+    PropertyAttribute,
+    Aggregate,
+)
+
 
 def generate_code_from_capture_sheet(
     input_file_path: Path, output_path: Path, sheet_name: str = "Sheet1"
@@ -31,6 +41,7 @@ def refactor_generated_code(generated_path: Path):
         [
             SemanticType.__name__,
             PropertyAttribute.__name__,
+            DatabasePath.__name__,
             Database.__name__,
             DatabaseTable.__name__,
             DatabaseColumn.__name__,

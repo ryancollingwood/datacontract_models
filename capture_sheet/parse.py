@@ -5,6 +5,7 @@ from models import (
     SemanticType,
     PropertyAttribute,
     Actor,
+    DatabasePath,
     Database,
     DatabaseTable,
     DatabaseColumn,
@@ -62,15 +63,26 @@ class CaptureSheetParser:
             )
 
         database_column = row.column
-        if not self.capture_sheet.is_present(database_column, self.capture_sheet.database_columns):
+        if not self.capture_sheet.dbo_is_present(database, database_table, database_column):
+            reference = None
+            reference_database = row.reference_database
+            reference_table = row.reference_table
+            reference_column = row.reference_column
+
+            if all([reference_database, reference_table, reference_column]):
+                reference = DatabasePath(
+                    database=reference_database,
+                    table=reference_table,
+                    column=reference_column,
+                )
+
             self.capture_sheet.database_columns[database_column] = DatabaseColumn(
                 name=database_column,
                 table=self.capture_sheet.database_tables[database_table],
                 schema_type=row.schema_type,
                 not_null=row.not_null,
                 is_unique=row.is_unique,
-                # TODO references
-                references=None,
+                references=reference,
             )
 
         return self.new_property(row, property_attribute, database_column, row.attribute_cardinality)

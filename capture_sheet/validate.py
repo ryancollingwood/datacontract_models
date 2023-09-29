@@ -85,6 +85,7 @@ def check_uniqueness(
         if partition_cols is not None:
             msg = f"{msg} for partition ({actual_partition})"
         msg = f"Uniqueness check failed: {msg}"
+        # TODO: log the check_counts as part of the validation error output
         assert max(check_counts) == 1, msg
     except AssertionError as e:
         raise e

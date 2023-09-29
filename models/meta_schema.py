@@ -4,7 +4,7 @@ from pydantic import Field, validator
 from .schema_type import SchemaType
 from .cardinality import Cardinality
 from .data_classification import DataClassification
-from .meta_schema_base_model import MetaSchemaModel, MetaSchemaContainerModel
+from .meta_schema_base_model import MetaSchemaBaseModel, MetaSchemaModel, MetaSchemaContainerModel
 
 
 class SemanticType(MetaSchemaModel):
@@ -13,6 +13,23 @@ class SemanticType(MetaSchemaModel):
 class PropertyAttribute(MetaSchemaModel):
   _to_contract_flatten_model: bool = True
   semantic_type: SemanticType
+
+class DatabasePath(MetaSchemaBaseModel):
+  database: str
+  table: str
+  column: str
+
+  @classmethod
+  def from_database_column(cls, database_column: 'DatabaseColumn'):
+    return cls(
+      database=database_column.table.database.name,
+      table=database_column.table.name,
+      column=database_column.name
+    )
+  
+  @property
+  def name(self):
+    return f"{self.database}.{self.table}.{self.column}"
 
 class Database(MetaSchemaModel):
   pass
@@ -25,7 +42,11 @@ class DatabaseColumn(MetaSchemaModel):
   schema_type: SchemaType
   not_null: bool
   is_unique: bool
-  references: Optional['DatabaseColumn'] = Field(default = None)
+  references: Optional[DatabasePath] = Field(default = None)
+
+  @property
+  def dbo(self):
+    return DatabasePath.from_database_column(self)
 
   def get_contract_items(self):
     return {
