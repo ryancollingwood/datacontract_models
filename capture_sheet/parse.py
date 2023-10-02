@@ -15,6 +15,7 @@ from models import (
     Event,
 )
 from models import Actor
+from models.cardinality import Cardinality
 
 from .models.capture_sheet_model import CaptureSheetModel
 from .models.capture_sheet_row_model import CaptureSheetRowModel
@@ -75,7 +76,7 @@ class CaptureSheetParser:
                 references=reference,
             )
 
-        return self.new_property(row, property_attribute, database_column, row.attribute_cardinality)
+        return self.new_property(row)
 
     def extract_database_reference(self, row: CaptureSheetRowModel):
         reference = None
@@ -97,16 +98,19 @@ class CaptureSheetParser:
             
         return reference
 
-    def new_property(self, row, property_attribute, database_column, attribute_cardinality):
-        attribute = None
+    def new_property(self, row: CaptureSheetRowModel):
+        property_attribute = row.attribute
+        database_column = row.column
+        attribute_cardinality = row.attribute_cardinality
         source = None
-        # TODO is_identifier
+
+        # TODO: is_identifier
         is_identifier = False
 
-        if property_attribute is not None:
-            attribute = self.capture_sheet.property_attributes[property_attribute]
+        attribute = self.capture_sheet.property_attributes[property_attribute]
         if database_column is not None:
             source = self.capture_sheet.database_columns[database_column]
+
 
         property_extra = {k:v for k,v in row.model_extra.items() if k in self.column_remapper.property_columns}
         return Property(
