@@ -1,4 +1,5 @@
 from .cardinality import Cardinality
+from .uniqueness import Variety
 from .schema_type import SchemaType
 from .data_classification import DataClassification
 from .meta_schema_base_model import MetaSchemaBaseModel, MetaSchemaModel, MetaSchemaContainerModel
