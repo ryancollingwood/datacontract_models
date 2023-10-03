@@ -2,7 +2,7 @@ from typing import Any, Optional, Dict
 
 from pydantic import Field, model_validator
 
-from models import Cardinality, SchemaType, DataClassification
+from models import Cardinality, SchemaType, DataClassification, Variety
 
 from .capture_sheet_base_model import CaptureSheetBaseModel
 
@@ -17,6 +17,7 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
     attribute_cardinality: Cardinality
     semantic_type: str
     data_classification: DataClassification = Field(default=DataClassification.UNSPECIFIED)
+    data_variety: Variety = Field(default=Variety.UNSPECIFIED)
     schema_type: SchemaType
     column: Optional[str | None] = Field(default = None)
     table: Optional[str | None] = Field(default = None)
@@ -70,3 +71,24 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
             assert all([ref_column_specified, ref_table_specified, ref_database_specified]), msg
 
         return value
+    
+    @model_validator(mode="after")
+    def check_schema_type_and_variety(cls, value: "CaptureSheetRowModel"):
+        schema_type_specified = value.schema_type.is_specified()
+        variety_specified = value.data_variety.is_specified()
+
+        if variety_specified and not schema_type_specified:
+            msg = "If data_variety is specified - schema_type must be specified"
+            assert schema_type_specified, msg
+        
+        if schema_type_specified and variety_specified:
+            is_variety_unique = value.data_variety in [Variety.LOCALLY_UNIQUE, Variety.GLOBALLY_UNIQUE]
+            is_data_type_uid = value.schema_type in [SchemaType.UUID, SchemaType.GUID]
+            if is_data_type_uid and not is_variety_unique:
+                """
+                GUID and UUID by definition should be GLOBALLY_UNIQUE, however allowing for the possibility
+                that it's LOCALLY_UNIQUE - perhaps a future enhancement would be to raise a warning if 
+                LOCALLY_UNIQUE
+                """
+                msg = "If schema_type is UUID or GUID - data_variety must be LOCALLY_UNIQUE or GLOBALLY_UNIQUE"
+                assert not is_variety_unique, msg
