@@ -40,6 +40,7 @@ class CaptureSheetParser:
             self.capture_sheet.semantic_types[semantic_type] = SemanticType(
                 name=semantic_type,
                 classification=row.data_classification,
+                variety=row.data_variety
                 )
 
         property_attribute = row.attribute

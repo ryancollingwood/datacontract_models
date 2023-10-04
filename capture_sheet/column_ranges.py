@@ -1,6 +1,6 @@
 from typing import List, Dict
 import pandas as pd
-from .column_names import EVENT, RAISED_BY, RECEIVED_BY
+from .column_names import DATA_VARIETY, EVENT, RAISED_BY, RECEIVED_BY
 from .column_names import ENTITY, ENTITY_CARDINALITY
 from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY
 from .column_names import SEMANTIC_TYPE, DATA_CLASSIFICATION
@@ -23,6 +23,7 @@ PROPERTY_COLUMNS = (
 ATTRIBUTE_COLUMNS = (
     SEMANTIC_TYPE,
     DATA_CLASSIFICATION,
+    DATA_VARIETY,
 )
 SOURCE_COLUMNS = (
     SCHEMA_TYPE,

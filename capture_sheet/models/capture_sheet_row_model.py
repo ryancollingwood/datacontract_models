@@ -16,8 +16,8 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
     attribute: str
     attribute_cardinality: Cardinality
     semantic_type: str
-    data_classification: DataClassification = Field(default=DataClassification.UNSPECIFIED)
-    data_variety: Variety = Field(default=Variety.UNSPECIFIED)
+    data_classification: DataClassification = Field(default=DataClassification.UNSPECIFIED, validation_alias="classification")
+    data_variety: Variety = Field(default=Variety.UNSPECIFIED, validation_alias="variety")
     schema_type: SchemaType
     column: Optional[str | None] = Field(default = None)
     table: Optional[str | None] = Field(default = None)
@@ -82,8 +82,8 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
             assert schema_type_specified, msg
         
         if schema_type_specified and variety_specified:
-            is_variety_unique = value.data_variety in [Variety.LOCALLY_UNIQUE, Variety.GLOBALLY_UNIQUE]
-            is_data_type_uid = value.schema_type in [SchemaType.UUID, SchemaType.GUID]
+            is_variety_unique = value.data_variety.is_unique()
+            is_data_type_uid = value.schema_type.is_uid()
             if is_data_type_uid and not is_variety_unique:
                 """
                 GUID and UUID by definition should be GLOBALLY_UNIQUE, however allowing for the possibility

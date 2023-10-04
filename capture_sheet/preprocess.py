@@ -2,6 +2,7 @@ from typing import List
 import pandas as pd
 from common.str_utils import pascal_case
 from .column_names import (
+    DATA_VARIETY,
     ENTITY_CARDINALITY,
     ATTRIBUTE_CARDINALITY,
     DATA_CLASSIFICATION,
@@ -39,15 +40,20 @@ def preprocess_columns(
 ) -> pd.DataFrame:
     result_df = df.copy()
 
+    result_df = normalise_column_names(result_df)
+    
     if optional_columns is not None:
         result_df = add_optional_columns(result_df, optional_columns)
     result_df = result_df.replace({"": None})
 
-    result_df.pipe(normalise_column_names).pipe(
-        pascal_case_column_values, ENTITY_CARDINALITY
-    ).pipe(pascal_case_column_values, ATTRIBUTE_CARDINALITY).pipe(
-        pascal_case_column_values, DATA_CLASSIFICATION
-    )
+
+    for enum_col in [
+        ENTITY_CARDINALITY,
+        ATTRIBUTE_CARDINALITY,
+        DATA_CLASSIFICATION,
+        DATA_VARIETY,
+    ]:
+        result_df = pascal_case_column_values(result_df, enum_col)
 
     return result_df
 
@@ -57,4 +63,3 @@ def ffill_sparse_cols(df, column_groups: List[List[str]]):
         for col in ffill_cols:
             df[col] = df[col].ffill()
     return df
-

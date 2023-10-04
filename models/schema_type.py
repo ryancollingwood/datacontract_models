@@ -9,5 +9,5 @@ class SchemaType(MetaSchemaEnum):
     INT = "int"
     DECIMAL = "decimal"
 
-    def is_unique(self):
+    def is_uid(self):
         return self in [SchemaType.UUID, SchemaType.GUID]

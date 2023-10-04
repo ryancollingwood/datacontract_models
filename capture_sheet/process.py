@@ -5,6 +5,7 @@ from capture_sheet.column_names import (
     ATTRIBUTE,
     COLUMN,
     DATA_CLASSIFICATION,
+    DATA_VARIETY,
     DATABASE,
     ENTITY,
     EVENT,
@@ -46,10 +47,12 @@ class CaptureSheetProcessor:
 
     def __preprocess_capture_sheet(self):
         result_df = self.input_df.copy()
-        result_df = preprocess_columns(result_df, [DATA_CLASSIFICATION])
+        result_df = preprocess_columns(
+            result_df, optional_columns=[DATA_CLASSIFICATION, DATA_VARIETY]
+        )
 
         column_remapper = ColumnRemapper(original_columns=list(result_df.columns))
-        
+
         result_df.rename(columns=column_remapper.renamed_columns, inplace=True)
         result_df = result_df[column_remapper.sorted_columns]
 
@@ -58,7 +61,7 @@ class CaptureSheetProcessor:
         )
 
         self.column_remapper = column_remapper
-    
+
         self.processed_path = get_processed_path(self.output_path)
         result_df.to_csv(self.processed_path, index=False)
 
@@ -67,7 +70,6 @@ class CaptureSheetProcessor:
         self.column_remapper_path = column_remapper_path
 
         self.__processed_df = result_df
-
 
     def __validate_capture_sheet(self):
         column_remapper = self.column_remapper
@@ -159,17 +161,14 @@ class CaptureSheetProcessor:
         self.detected_schema_path = get_detected_schema_path(self.output_path)
         processed_info_df.to_csv(self.detected_schema_path, index=False)
 
-
     def __process(self) -> pd.DataFrame:
         self.__preprocess_capture_sheet()
         self.__infer_processed_df_schemo_info()
         self.__validate_capture_sheet()
 
-    
     @property
     def output_df(self) -> pd.DataFrame:
         if self.is_valid:
             return self.__processed_df.copy()
         else:
             return None
-

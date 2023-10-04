@@ -3,7 +3,7 @@ from models import *
 semantictype_unique_identifier = SemanticType(
     name="unique identifier",
     classification=DataClassification.UNSPECIFIED,
-    variety=Variety.UNSPECIFIED,
+    variety=Variety.GLOBALLY_UNIQUE,
 )
 semantictype_person_name = SemanticType(
     name="person name",
