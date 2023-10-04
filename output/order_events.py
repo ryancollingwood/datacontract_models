@@ -3,26 +3,32 @@ from models import *
 semantictype_unique_identifier = SemanticType(
     name="unique identifier",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 semantictype_person_name = SemanticType(
     name="person name",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 semantictype_location = SemanticType(
     name="location",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 semantictype_product_name = SemanticType(
     name="product name",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 semantictype_product_variation = SemanticType(
     name="product variation",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 semantictype_product_quantity = SemanticType(
     name="product quantity",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 propertyattribute_id = PropertyAttribute(
     name="id",
@@ -205,10 +211,12 @@ event_order_requested = Event(
 semantictype_currency_aud_excluding_tax = SemanticType(
     name="currency aud excluding tax",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 semantictype_currency_aud_including_tax = SemanticType(
     name="currency aud including tax",
     classification=DataClassification.UNSPECIFIED,
+    variety=Variety.UNSPECIFIED,
 )
 propertyattribute_order_id = PropertyAttribute(
     name="order id",
