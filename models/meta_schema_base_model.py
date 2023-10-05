@@ -11,26 +11,31 @@ class MetaSchemaBaseModel(BaseModel):
         anystr_strip_whitespace=True, anystr_lower=True, validate_all=True, extra=Extra.allow,
       )
     
-    def get_meta_schema_label(value: "MetaSchemaBaseModel"):
+    @property
+    def slug(self):
         label = None
 
-        if isinstance(value, MetaSchemaModel):
-            label = value.name
-        elif isinstance(value, MetaSchemaContainerModel):
-            if hasattr(value, NAME):
-                label = value.name()
+        if isinstance(self, MetaSchemaModel):
+            label = self.name
+        elif isinstance(self, MetaSchemaContainerModel):
+            if getattr(self, NAME, None):
+                label = self.name
+                if callable(label):
+                    label = label()
             else:
                 # todo raise a warning
                 # print("Warning: no name attribute found for MetaSchemaContainerModel:", value)
-                for key, val in value.__dict__.items():
+                for key, val in self.__dict__.items():
                     if isinstance(val, MetaSchemaBaseModel):
                         label = f"{key} {val.name}"
                         break
-        elif isinstance(value, dict):
-            label = value.get(NAME)
+        else:
+            raise("Unknown type")
+        # elif isinstance(value, dict):
+        #     label = value.get(NAME)
             
         if label is None:
-            raise ValueError(f"Could not determine label for {type(value)}: {value}")
+            raise ValueError(f"Could not determine label for {type(self)}: {self}")
 
         return sluggify(label)
     
@@ -116,7 +121,7 @@ class MetaSchemaBaseModel(BaseModel):
             elif isinstance(v, list) or isinstance(v, set):
                 element_types = [isinstance(x, MetaSchemaContainerModel) for x in v]
                 if all(element_types):
-                    result = self.add_contract_detail(result, k, {x.get_meta_schema_label():x.to_contract(is_root=False) for x in v})
+                    result = self.add_contract_detail(result, k, {x.slug:x.to_contract(is_root=False) for x in v})
                     continue
                 
             if k not in result:
@@ -138,13 +143,12 @@ class MetaSchemaBaseModel(BaseModel):
         # i.e. it only had a single property which was
         # it's name, so return the label
         if len(result) == 0:
-            return self.get_meta_schema_label()
+            return self.slug
 
         return result
     
 class MetaSchemaContainerModel(MetaSchemaBaseModel):
-    cardinality: Cardinality
-            
+    cardinality: Cardinality    
 
 class MetaSchemaModel(MetaSchemaBaseModel):
     _to_contract_flatten_model: bool = False
