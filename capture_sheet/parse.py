@@ -105,9 +105,6 @@ class CaptureSheetParser:
         attribute_cardinality = row.attribute_cardinality
         source = None
 
-        # TODO: is_identifier
-        is_identifier = False
-
         attribute = self.capture_sheet.property_attributes[property_attribute]
         if database_column is not None:
             source = self.capture_sheet.database_columns[database_column]
@@ -118,7 +115,6 @@ class CaptureSheetParser:
             attribute=attribute,
             source=source,
             cardinality=attribute_cardinality,
-            is_identifier=is_identifier,
             **property_extra,
         )
         

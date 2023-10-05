@@ -131,13 +131,11 @@ aggregate_customer = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
             source=databasecolumn_customer_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_name,
             source=databasecolumn_customer_first_name,
-            is_identifier=False,
         ),
     ],
 )
@@ -148,13 +146,11 @@ aggregate_customer_address = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
             source=databasecolumn_address_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONE_OR_MORE,
             attribute=propertyattribute_address_lines,
             source=None,
-            is_identifier=False,
         ),
     ],
 )
@@ -165,25 +161,21 @@ aggregate_order_items = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_menu_item,
             source=databasecolumn_product_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_menu_description,
             source=None,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ZERO_OR_MANY,
             attribute=propertyattribute_variation,
             source=databasecolumn_variation,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_quantity,
             source=databasecolumn_quantity,
-            is_identifier=False,
         ),
     ],
 )
@@ -289,19 +281,16 @@ aggregate_order = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_order_id,
             source=databasecolumn_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_order_subtotal,
             source=databasecolumn_subtotal,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_order_total,
             source=databasecolumn_total,
-            is_identifier=False,
         ),
     ],
 )
@@ -312,7 +301,6 @@ order_confirmed_customer = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
             source=databasecolumn_customer_id,
-            is_identifier=False,
         )
     ],
 )
@@ -323,7 +311,6 @@ order_confirmed_customer_address = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_address_id,
             source=databasecolumn_address_id,
-            is_identifier=False,
         )
     ],
 )
@@ -334,37 +321,31 @@ order_confirmed_order_items = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_menu_item,
             source=databasecolumn_product_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_menu_description,
             source=None,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ZERO_OR_MANY,
             attribute=propertyattribute_variation,
             source=databasecolumn_variation,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_quantity,
             source=databasecolumn_quantity,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_item_price,
             source=databasecolumn_item_price_aud_ex_tax,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_line_total,
             source=databasecolumn_line_total_aud_ex_tax,
-            is_identifier=False,
         ),
     ],
 )
@@ -417,13 +398,11 @@ aggregate_current_address = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
             source=customer_details_updated_current_address_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONE_OR_MORE,
             attribute=propertyattribute_address_lines,
             source=databasecolumn_line_,
-            is_identifier=False,
         ),
     ],
 )
@@ -434,13 +413,11 @@ aggregate_prioir_addresses = Aggregate(
             cardinality=Cardinality.ONLY_ONE,
             attribute=propertyattribute_id,
             source=customer_details_updated_current_address_id,
-            is_identifier=False,
         ),
         Property(
             cardinality=Cardinality.ONE_OR_MORE,
             attribute=propertyattribute_address_lines,
             source=databasecolumn_line_,
-            is_identifier=False,
         ),
     ],
 )
