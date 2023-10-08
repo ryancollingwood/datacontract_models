@@ -2,12 +2,12 @@ from models import *
 
 semantictype_unique_identifier = SemanticType(
     name="unique identifier",
-    classification=DataClassification.UNSPECIFIED,
+    classification=DataClassification.INTERNAL,
     variety=Variety.GLOBALLY_UNIQUE,
 )
 semantictype_person_name = SemanticType(
     name="person name",
-    classification=DataClassification.UNSPECIFIED,
+    classification=DataClassification.PRIVATE,
     variety=Variety.UNSPECIFIED,
 )
 semantictype_location = SemanticType(
