@@ -1,5 +1,7 @@
 from models import *
 
+actor_customer = Actor(name="customer")
+actor_order_application = Actor(name="order application")
 semantictype_unique_identifier = SemanticType(
     name="unique identifier",
     classification=DataClassification.INTERNAL,
@@ -181,8 +183,8 @@ aggregate_order_items = Aggregate(
 )
 event_order_requested = Event(
     name="order requested",
-    raised_by=Actor(name="customer"),
-    received_by=Actor(name="order application"),
+    raised_by=actor_customer,
+    received_by=actor_order_application,
     aggregates=[
         EventAggregate(
             cardinality=Cardinality.ONLY_ONE,
@@ -351,8 +353,8 @@ order_confirmed_order_items = Aggregate(
 )
 event_order_confirmed = Event(
     name="order confirmed",
-    raised_by=Actor(name="order application"),
-    received_by=Actor(name="customer"),
+    raised_by=actor_order_application,
+    received_by=actor_customer,
     aggregates=[
         EventAggregate(
             cardinality=Cardinality.ONLY_ONE,
@@ -423,8 +425,8 @@ aggregate_prioir_addresses = Aggregate(
 )
 event_customer_details_updated = Event(
     name="customer details updated",
-    raised_by=Actor(name="customer"),
-    received_by=Actor(name="order application"),
+    raised_by=actor_customer,
+    received_by=actor_order_application,
     aggregates=[
         EventAggregate(
             cardinality=Cardinality.ONLY_ONE,

@@ -7,6 +7,7 @@ from common.str_utils import sluggify
 from refactoring import variable_extraction
 from capture_sheet import CaptureSheetProcessor
 from models import (
+    Actor,
     SemanticType,
     PropertyAttribute,
     DatabasePath,
@@ -39,6 +40,7 @@ def refactor_generated_code(generated_path: Path):
     variable_extraction(
         generated_path,
         [
+            Actor.__name__,
             SemanticType.__name__,
             PropertyAttribute.__name__,
             DatabasePath.__name__,
