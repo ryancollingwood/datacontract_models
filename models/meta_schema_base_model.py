@@ -109,11 +109,9 @@ class MetaSchemaBaseModel(BaseModel):
             if not is_root and k == NAME:
                 continue
 
-            if isinstance(v, Cardinality):
-                allows_zero = v in [Cardinality.ZERO_OR_ONE, Cardinality.ZERO_OR_MANY]
-                singular = [Cardinality.ONLY_ONE, Cardinality.ZERO_OR_ONE]            
-                result = self.add_contract_detail(result, OPTIONAL, allows_zero)
-                result = self.add_contract_detail(result, MULTIPLE, not singular)
+            if isinstance(v, Cardinality):        
+                result = self.add_contract_detail(result, OPTIONAL, v.is_optional())
+                result = self.add_contract_detail(result, MULTIPLE, not v.is_singular())
                 continue
             elif isinstance(v, Enum):
                 result = self.add_contract_detail(result, k, str(v.value))
