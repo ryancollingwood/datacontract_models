@@ -8,36 +8,39 @@ from .consts import NAME, OPTIONAL, MULTIPLE
 
 class MetaSchemaBaseModel(BaseModel):
     model_config: ConfigDict = ConfigDict(
-        anystr_strip_whitespace=True, anystr_lower=True, validate_all=True, extra=Extra.allow,
+        str_strip_whitespace=True, 
+        validate_default=True, 
+        extra=Extra.allow,
       )
     
-    @property
-    def slug(self):
-        label = None
-
+    def __get_name(self):
+        result = None
         if isinstance(self, MetaSchemaModel):
-            label = self.name
+            result = self.name
         elif isinstance(self, MetaSchemaContainerModel):
             if getattr(self, NAME, None):
-                label = self.name
-                if callable(label):
-                    label = label()
+                result = self.name
+                if callable(result):
+                    result = result()
             else:
                 # todo raise a warning
                 # print("Warning: no name attribute found for MetaSchemaContainerModel:", value)
                 for key, val in self.__dict__.items():
                     if isinstance(val, MetaSchemaBaseModel):
-                        label = f"{key} {val.name}"
+                        result = f"{key} {val.name}"
                         break
         else:
             raise("Unknown type")
-        # elif isinstance(value, dict):
-        #     label = value.get(NAME)
-            
-        if label is None:
-            raise ValueError(f"Could not determine label for {type(self)}: {self}")
-
-        return sluggify(label)
+        
+        if result is None:
+            raise ValueError(f"Could not determine name for {type(self)}: {self}")
+        
+        return result
+    
+    @property
+    def slug(self):
+        name = self.__get_name()
+        return sluggify(name)
     
     def get_contract_items(self) -> Dict[str, Any]:
         base_dict = self.__dict__
@@ -141,7 +144,7 @@ class MetaSchemaBaseModel(BaseModel):
         # i.e. it only had a single property which was
         # it's name, so return the label
         if len(result) == 0:
-            return self.slug
+            return self.__get_name()
 
         return result
     
