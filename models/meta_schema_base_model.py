@@ -130,6 +130,7 @@ class MetaSchemaBaseModel(BaseModel):
                     base_model_contract = v.to_contract(is_root=False)
                     if isinstance(base_model_contract, dict):
                         if not v._to_contract_flatten_model:
+                            base_model_contract = {k: v.name} | base_model_contract
                             result = self.add_contract_detail(result, k, base_model_contract)
                         else:
                             result = self.merge_contract_items(result, base_model_contract)
