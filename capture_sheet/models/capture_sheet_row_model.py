@@ -2,7 +2,7 @@ from typing import Any, Optional, Dict
 
 from pydantic import Field, model_validator
 
-from models import Cardinality, SchemaType, DataClassification, Variety
+from models import Cardinality, SchemaType, DataClassification, Variety, MetaTiming
 
 from .capture_sheet_base_model import CaptureSheetBaseModel
 
@@ -15,6 +15,7 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
     entity_cardinality: Cardinality
     attribute: str
     attribute_cardinality: Cardinality
+    attribute_timing: Optional[MetaTiming | None] = Field(default=None, validation_alias="timing")
     semantic_type: str
     data_classification: DataClassification = Field(default=DataClassification.UNSPECIFIED, validation_alias="classification")
     data_variety: Variety = Field(default=Variety.UNSPECIFIED, validation_alias="variety")
