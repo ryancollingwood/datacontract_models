@@ -14,12 +14,14 @@ def pascal_case(value: str) -> str:
 
 def sluggify(text):
   """
-  """
-  """
   Takes text and converts it into a form that complies with variable names
-  It is very naive and will fail
-  e.g. the case of the text beginning with a number
+  i.e. all lowercase, no spaces instead underspaces, 
+    digits and underscores allowed but not as the first character
   """
-  result = str(re.sub(r"[^A-Za-z\_]", " ", text)).lower().strip()
-  result = re.sub(r"\s{2,}", " ", result)
+  result = str(re.sub(r"[^A-Za-z\_\d]", " ", text)).lower()
+  result = re.sub(r"\s{2,}", " ", result).strip()
+
+  if result[0] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_"]:
+    result = result[1:]
+
   return result.replace(" ", "_")

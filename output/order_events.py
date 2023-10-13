@@ -1,65 +1,65 @@
 from models import *
 
-actor_customer = Actor(name="customer")
-actor_order_application = Actor(name="order application")
+actor_customer = Actor(name="Customer")
+actor_order_application = Actor(name="Order Application")
 semantictype_unique_identifier = SemanticType(
-    name="unique identifier",
+    name="Unique Identifier",
     classification=DataClassification.INTERNAL,
     variety=Variety.GLOBALLY_UNIQUE,
 )
 semantictype_person_name = SemanticType(
-    name="person name",
+    name="Person Name",
     classification=DataClassification.PRIVATE,
     variety=Variety.UNSPECIFIED,
 )
 semantictype_location = SemanticType(
-    name="location",
+    name="Location",
     classification=DataClassification.UNSPECIFIED,
     variety=Variety.UNSPECIFIED,
 )
 semantictype_product_name = SemanticType(
-    name="product name",
+    name="Product Name",
     classification=DataClassification.UNSPECIFIED,
     variety=Variety.UNSPECIFIED,
 )
 semantictype_product_variation = SemanticType(
-    name="product variation",
+    name="Product Variation",
     classification=DataClassification.UNSPECIFIED,
     variety=Variety.UNSPECIFIED,
 )
 semantictype_product_quantity = SemanticType(
-    name="product quantity",
+    name="Product Quantity",
     classification=DataClassification.UNSPECIFIED,
     variety=Variety.UNSPECIFIED,
 )
 propertyattribute_id = PropertyAttribute(
-    name="id",
+    name="ID",
     semantic_type=semantictype_unique_identifier,
 )
 propertyattribute_name = PropertyAttribute(
-    name="name",
+    name="Name",
     semantic_type=semantictype_person_name,
     alias="Customer Name",
 )
 propertyattribute_address_lines = PropertyAttribute(
-    name="address lines",
+    name="Address Lines",
     semantic_type=semantictype_location,
 )
 propertyattribute_menu_item = PropertyAttribute(
-    name="menu item",
+    name="Menu Item",
     semantic_type=semantictype_unique_identifier,
 )
 propertyattribute_menu_description = PropertyAttribute(
-    name="menu description",
+    name="Menu Description",
     semantic_type=semantictype_product_name,
 )
 propertyattribute_variation = PropertyAttribute(
-    name="variation",
+    name="Variation",
     semantic_type=semantictype_product_variation,
     alias="Modifications",
 )
 propertyattribute_quantity = PropertyAttribute(
-    name="quantity",
+    name="Quantity",
     semantic_type=semantictype_product_quantity,
 )
 databasepath_super_pos_customers_id = DatabasePath(
@@ -127,7 +127,7 @@ databasecolumn_quantity = DatabaseColumn(
     references=None,
 )
 aggregate_customer = Aggregate(
-    name="customer",
+    name="Customer",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -142,7 +142,7 @@ aggregate_customer = Aggregate(
     ],
 )
 aggregate_customer_address = Aggregate(
-    name="customer address",
+    name="Customer Address",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -157,7 +157,7 @@ aggregate_customer_address = Aggregate(
     ],
 )
 aggregate_order_items = Aggregate(
-    name="order items",
+    name="Order Items",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -182,7 +182,7 @@ aggregate_order_items = Aggregate(
     ],
 )
 event_order_requested = Event(
-    name="order requested",
+    name="Order Requested",
     raised_by=actor_customer,
     received_by=actor_order_application,
     aggregates=[
@@ -203,37 +203,37 @@ event_order_requested = Event(
 )
 
 semantictype_currency_aud_excluding_tax = SemanticType(
-    name="currency aud excluding tax",
+    name="Currency AUD Excluding Tax",
     classification=DataClassification.UNSPECIFIED,
     variety=Variety.UNSPECIFIED,
 )
 semantictype_currency_aud_including_tax = SemanticType(
-    name="currency aud including tax",
+    name="Currency AUD Including Tax",
     classification=DataClassification.UNSPECIFIED,
     variety=Variety.UNSPECIFIED,
 )
 propertyattribute_order_id = PropertyAttribute(
-    name="order id",
+    name="Order ID",
     semantic_type=semantictype_unique_identifier,
 )
 propertyattribute_order_subtotal = PropertyAttribute(
-    name="order subtotal",
+    name="Order Subtotal",
     semantic_type=semantictype_currency_aud_excluding_tax,
 )
 propertyattribute_order_total = PropertyAttribute(
-    name="order total",
+    name="Order Total",
     semantic_type=semantictype_currency_aud_including_tax,
 )
 propertyattribute_address_id = PropertyAttribute(
-    name="address id",
+    name="Address ID",
     semantic_type=semantictype_unique_identifier,
 )
 propertyattribute_item_price = PropertyAttribute(
-    name="item price",
+    name="Item Price",
     semantic_type=semantictype_currency_aud_excluding_tax,
 )
 propertyattribute_line_total = PropertyAttribute(
-    name="line total",
+    name="Line Total",
     semantic_type=semantictype_currency_aud_excluding_tax,
 )
 databasecolumn_id = DatabaseColumn(
@@ -277,7 +277,7 @@ databasecolumn_line_total_aud_ex_tax = DatabaseColumn(
     references=None,
 )
 aggregate_order = Aggregate(
-    name="order",
+    name="Order",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -297,7 +297,7 @@ aggregate_order = Aggregate(
     ],
 )
 order_confirmed_customer = Aggregate(
-    name="customer",
+    name="Customer",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -307,7 +307,7 @@ order_confirmed_customer = Aggregate(
     ],
 )
 order_confirmed_customer_address = Aggregate(
-    name="customer address",
+    name="Customer Address",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -317,7 +317,7 @@ order_confirmed_customer_address = Aggregate(
     ],
 )
 order_confirmed_order_items = Aggregate(
-    name="order items",
+    name="Order Items",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -352,7 +352,7 @@ order_confirmed_order_items = Aggregate(
     ],
 )
 event_order_confirmed = Event(
-    name="order confirmed",
+    name="Order Confirmed",
     raised_by=actor_order_application,
     received_by=actor_customer,
     aggregates=[
@@ -385,7 +385,7 @@ customer_details_updated_current_address_id = DatabaseColumn(
     is_unique=True,
     references=databasepath_super_pos_adresses_id,
 )
-databasecolumn_line_ = DatabaseColumn(
+databasecolumn_line_1 = DatabaseColumn(
     name="line_1",
     table=databasetable_adresses,
     schema_type=SchemaType.STR,
@@ -394,7 +394,7 @@ databasecolumn_line_ = DatabaseColumn(
     references=None,
 )
 aggregate_current_address = Aggregate(
-    name="current address",
+    name="Current Address",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -404,12 +404,12 @@ aggregate_current_address = Aggregate(
         Property(
             cardinality=Cardinality.ONE_OR_MORE,
             attribute=propertyattribute_address_lines,
-            source=databasecolumn_line_,
+            source=databasecolumn_line_1,
         ),
     ],
 )
 aggregate_prioir_addresses = Aggregate(
-    name="prioir addresses",
+    name="Prioir Addresses",
     properties=[
         Property(
             cardinality=Cardinality.ONLY_ONE,
@@ -419,12 +419,12 @@ aggregate_prioir_addresses = Aggregate(
         Property(
             cardinality=Cardinality.ONE_OR_MORE,
             attribute=propertyattribute_address_lines,
-            source=databasecolumn_line_,
+            source=databasecolumn_line_1,
         ),
     ],
 )
 event_customer_details_updated = Event(
-    name="customer details updated",
+    name="Customer Details Updated",
     raised_by=actor_customer,
     received_by=actor_order_application,
     aggregates=[
