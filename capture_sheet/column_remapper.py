@@ -1,4 +1,5 @@
 from typing import List, Dict
+from itertools import chain
 from collections import Counter
 from pydantic import BaseModel, Field
 from .column_ranges import COLUMN_MAP
@@ -10,6 +11,8 @@ class ColumnRemapper(BaseModel):
     sorted_columns: List[str] = Field(default_factory=list)
     custom_columns: List[str] = Field(default_factory=list)
     column_map: Dict = Field(default_factory=dict)
+    known_keys: List[str] = list(COLUMN_MAP.keys())
+    known_columns: List[str] = list(chain.from_iterable([v for v in COLUMN_MAP.values()]))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,13 +32,17 @@ class ColumnRemapper(BaseModel):
         for prefix, column_range in COLUMN_MAP.items():
             result[prefix] = list()
             additional_prefix_columns = [column for column in self.original_columns if column.startswith(prefix) and column not in column_range]
-            additional_prefix_columns = [x for x in additional_prefix_columns if x not in original_sorted_columns]
+            additional_prefix_columns = [x for x in additional_prefix_columns if x not in self.known_columns]
 
             range_start_position = self.original_columns.index(column_range[0])
             range_end_position = self.original_columns.index(column_range[-1])
             additional_non_prefix_columns = [x for i,x in enumerate(self.original_columns) if i > range_start_position and i < range_end_position]
             additional_non_prefix_columns = [x for x in additional_non_prefix_columns if x not in additional_prefix_columns]
-            additional_non_prefix_columns = [x for x in additional_non_prefix_columns if x not in column_range]
+            additional_non_prefix_columns = [x for x in additional_non_prefix_columns if x not in self.known_columns]
+            additional_non_prefix_columns = [x for x in additional_non_prefix_columns if x not in custom_columns]
+            for p in self.known_keys:
+                additional_non_prefix_columns = [x for x in additional_non_prefix_columns if not x.startswith(p)]
+
             custom_columns.extend(additional_prefix_columns)
             custom_columns.extend(additional_non_prefix_columns)
 
@@ -56,9 +63,9 @@ class ColumnRemapper(BaseModel):
         if len(original_sorted_columns) != len(self.original_columns):
             difference = [x for x in self.original_columns if x not in original_sorted_columns]
             if len(difference) > 0:
-                raise ValueError(f"Columns were duplicated in output: {Counter(original_sorted_columns)}")
+                raise ValueError(f"Some columns were not included in the sorted result: {difference}")
             else:
-                raise ValueError(f"Not all columns were sorted: {difference}")
+                raise ValueError(f"Some columns were duplicted? - column counts: {dict(Counter(original_sorted_columns))}")
         
         renamed_sorted_columns = list()
         for prefix, column_range in result.items():

@@ -64,7 +64,7 @@ if __name__ == "__main__":
     output_path = Path("output")
     output_path.mkdir(parents=True, exist_ok=True)
 
-    input_file_path = Path("resources/Order Events.xlsx")
+    input_file_path = Path("resources/Ecommerce Events.xlsx")
     sheet_name = "Sheet1"
 
     generated_path = generate_code_from_capture_sheet(
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     refactor_generated_code(generated_path)
 
     # now this will be available for import after generation
-    from output.order_events import event_order_requested
+    from output.ecommerce_events import event_purchase_completed
 
-    contract = event_order_requested.to_contract()
+    contract = event_purchase_completed.to_contract()
     print(contract)

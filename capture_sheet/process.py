@@ -7,6 +7,7 @@ from capture_sheet.column_names import (
     COLUMN,
     DATA_CLASSIFICATION,
     ATTRIBUTE_CARDINALITY,
+    ATTRIBUTE_TIMING,
     ENTITY_CARDINALITY,
     DATA_VARIETY,
     DATABASE,
@@ -55,7 +56,7 @@ class CaptureSheetProcessor:
     def __preprocess_capture_sheet(self):
         result_df = self.input_df.copy()
         result_df = preprocess_columns(
-            result_df, optional_columns=[DATA_CLASSIFICATION, DATA_VARIETY]
+            result_df, optional_columns=[DATA_CLASSIFICATION, DATA_VARIETY, ATTRIBUTE_TIMING]
         )
 
         column_remapper = ColumnRemapper(original_columns=list(result_df.columns))

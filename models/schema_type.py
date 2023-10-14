@@ -40,6 +40,7 @@ class SchemaType(MetaSchemaEnum):
             SchemaType.TIMESTAMP,
             SchemaType.UTC_TIMESTAMP,
             SchemaType.EPOCH_TIMESTAMP,
+            SchemaType.DATETIME,
             SchemaType.DATE,
             SchemaType.TIME,
         ]

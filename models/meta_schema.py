@@ -89,14 +89,14 @@ class Property(MetaSchemaContainerModel):
     def is_required(self):
         return self.cardinality.is_mandatory()
 
-    @validator("timing", always=True)
+    @field_validator("timing")
     def get_timing(cls, v: MetaTiming, values, **kwargs):
         """
         Tried this with @computed_field but it didn't work
         So using a validator instead as per:
         https://github.com/pydantic/pydantic/issues/1928#issuecomment-692366291
         """
-        source: DatabaseColumn = values.get("source")
+        source: DatabaseColumn = values.data.get("source")
         timing: MetaTiming = v
         schema_type: SchemaType = None
         is_temporal: bool = False
