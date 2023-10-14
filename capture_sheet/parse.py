@@ -103,6 +103,7 @@ class CaptureSheetParser:
         property_attribute = row.attribute
         database_column = row.column
         attribute_cardinality = row.attribute_cardinality
+        timing = row.attribute_timing
         source = None
 
         attribute = self.capture_sheet.property_attributes[property_attribute]
@@ -115,6 +116,7 @@ class CaptureSheetParser:
             attribute=attribute,
             source=source,
             cardinality=attribute_cardinality,
+            timing=timing,
             **property_extra,
         )
         

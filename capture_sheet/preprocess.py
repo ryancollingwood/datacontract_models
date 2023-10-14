@@ -7,6 +7,7 @@ from .column_names import (
     ATTRIBUTE_CARDINALITY,
     DATA_CLASSIFICATION,
     SCHEMA_TYPE,
+    ATTRIBUTE_TIMING,
 )
 
 
@@ -53,6 +54,7 @@ def preprocess_columns(
         ATTRIBUTE_CARDINALITY,
         DATA_CLASSIFICATION,
         DATA_VARIETY,
+        ATTRIBUTE_TIMING,
     ]:
         result_df = pascal_case_column_values(result_df, enum_col)
     
