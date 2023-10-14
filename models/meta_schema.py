@@ -9,6 +9,7 @@ from .meta_schema_base_model import (
     MetaSchemaModel,
     MetaSchemaContainerModel,
 )
+from .meta_timing import MetaTiming
 
 
 class SemanticType(MetaSchemaModel):
@@ -75,6 +76,7 @@ class DatabaseColumn(MetaSchemaModel):
 class Property(MetaSchemaContainerModel):
     attribute: PropertyAttribute
     source: Optional[DatabaseColumn] = Field(default=None)
+    timing: Optional[MetaTiming] = Field(default=None)
 
     def name(self):
         return self.attribute.name
@@ -86,6 +88,40 @@ class Property(MetaSchemaContainerModel):
     @property
     def is_required(self):
         return self.cardinality.is_mandatory()
+
+    @validator("timing", always=True)
+    def get_timing(cls, v: MetaTiming, values, **kwargs):
+        """
+        Tried this with @computed_field but it didn't work
+        So using a validator instead as per:
+        https://github.com/pydantic/pydantic/issues/1928#issuecomment-692366291
+        """
+        source: DatabaseColumn = values.get("source")
+        timing: MetaTiming = v
+        schema_type: SchemaType = None
+        is_temporal: bool = False
+        is_timestamp: bool = False
+
+        if not source and not timing:
+            return None
+        
+        if source:
+            schema_type = source.schema_type
+            is_temporal = schema_type.is_temporal()
+            is_timestamp = schema_type.is_timestamp()
+
+        if source and not timing and is_temporal:
+            # TODO: raise a debug message that timing is unspecified
+            return MetaTiming.UNSPECIFIED
+        
+        if timing and source:
+            if not is_temporal:
+                raise ValueError(f"Timing specified for non-temporal source: {source.name}")
+            if not is_timestamp:
+                # TODO: raise a warning that the lack precision is suspect
+                pass
+
+        return timing
 
 
 class Aggregate(MetaSchemaModel):

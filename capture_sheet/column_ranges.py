@@ -2,7 +2,7 @@ from typing import List, Dict
 import pandas as pd
 from .column_names import DATA_VARIETY, EVENT, RAISED_BY, RECEIVED_BY
 from .column_names import ENTITY, ENTITY_CARDINALITY
-from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY
+from .column_names import ATTRIBUTE, ATTRIBUTE_CARDINALITY, ATTRIBUTE_TIMING
 from .column_names import SEMANTIC_TYPE, DATA_CLASSIFICATION
 from .column_names import SCHEMA_TYPE, DATABASE, TABLE, COLUMN, NOT_NULL, IS_UNIQUE
 from .column_names import REFERENCE_DATABASE, REFERENCE_TABLE, REFERENCE_COLUMN
@@ -19,6 +19,7 @@ ENTITY_COLUMNS = (
 PROPERTY_COLUMNS = (
     ATTRIBUTE,
     ATTRIBUTE_CARDINALITY,
+    ATTRIBUTE_TIMING,
 )
 ATTRIBUTE_COLUMNS = (
     SEMANTIC_TYPE,

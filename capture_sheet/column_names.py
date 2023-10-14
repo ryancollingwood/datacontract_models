@@ -5,6 +5,7 @@ ENTITY = 'entity'
 ENTITY_CARDINALITY = 'entity_cardinality'
 ATTRIBUTE = 'attribute'
 ATTRIBUTE_CARDINALITY = 'attribute_cardinality'
+ATTRIBUTE_TIMING = "attribute_timing"
 SEMANTIC_TYPE = 'semantic_type'
 DATA_CLASSIFICATION = 'classification'
 DATA_VARIETY = 'variety'
