@@ -8,6 +8,9 @@ class SchemaType(MetaSchemaEnum):
     UUID = "uuid"
     INT = "int"
     DECIMAL = "decimal"
+    BOOLEAN = "boolean"
+    DATE = "date"
+    DATETIME = "datetime"
 
     def is_uid(self):
         return self in [SchemaType.UUID, SchemaType.GUID]
