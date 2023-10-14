@@ -10,7 +10,9 @@ def pascal_case(value: str) -> str:
     Returns:
         str:
     """
-    return str(value).title().strip().replace(" ", "")
+    result = str(value).replace("-", " ").replace("_", " ")
+    result = str(result).title().strip().replace(" ", "")
+    return result
 
 def sluggify(text):
   """
@@ -22,7 +24,7 @@ def sluggify(text):
   # if we needed to normalise characters: unicodedata.normalize('NFKD', s)
   result = re.sub(r"\s{2,}", " ", result).strip()
 
-  if result[0] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_"]:
+  while len(result) > 0 and result[0] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_"]:
     result = result[1:]
 
   return result.replace(" ", "_")

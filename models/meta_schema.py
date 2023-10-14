@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from .schema_type import SchemaType
 from .data_classification import DataClassification
@@ -102,24 +102,24 @@ class EventAggregate(MetaSchemaContainerModel):
     def name(self):
         return self.aggregate.name
     
-    @validator("identifiers", always=True)
+    @field_validator("identifiers")
     def get_indentifiers(cls, v, values, **kwargs):
         """
         Tried this with @computed_field but it didn't work
         So using a validator instead as per:
         https://github.com/pydantic/pydantic/issues/1928#issuecomment-692366291
         """
-        result = [x.slug for x in values["aggregate"].properties if x.is_identifier]
+        result = [x.slug for x in values.data["aggregate"].properties if x.is_identifier]
         return result
     
-    @validator("required", always=True)
+    @field_validator("required")
     def get_required(cls, v, values, **kwargs):
         """
         Tried this with @computed_field but it didn't work
         So using a validator instead as per:
         https://github.com/pydantic/pydantic/issues/1928#issuecomment-692366291
         """
-        result = [x.slug for x in values["aggregate"].properties if x.is_required]
+        result = [x.slug for x in values.data["aggregate"].properties if x.is_required]
         return result
 
 

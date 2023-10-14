@@ -10,7 +10,7 @@ class MetaSchemaBaseModel(BaseModel):
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True, 
         validate_default=True, 
-        extra=Extra.allow,
+        extra="allow",
       )
     
     def __get_name(self):
