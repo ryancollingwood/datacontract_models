@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from copy import deepcopy
 import json
 import pandas as pd
@@ -34,7 +34,7 @@ def check_uniqueness(
     check_column: str,
     partition_cols: List[str] = None,
     parent_cols: List[str] = None,
-):
+) -> Union[pd.DataFrame, None]:
     """
     Check that the values in the `check_column` are unique for the given
     partition and parent columns.
@@ -49,8 +49,9 @@ def check_uniqueness(
             groupby after having filtered to subset of columns.
             Defaults to None.
 
-    Raises:
-        e: AssertionError if the uniqueness check fails
+    Returns:
+        None - if passing validation
+        Pandas DataFrame - if failing validation
     """
     if partition_cols is not None:
         actual_partition = deepcopy(partition_cols)
@@ -88,4 +89,11 @@ def check_uniqueness(
         # TODO: log the check_counts as part of the validation error output
         assert max(check_counts) == 1, msg
     except AssertionError as e:
-        raise e
+        # TODO emit this in logging
+        print(check_counts[check_counts > 1])
+        failed_col = check_counts.index.name
+        failed_index = list(check_counts[check_counts > 1].index)
+
+        return check_df[check_df[failed_col].isin(failed_index)].sort_values(failed_col)
+    
+    return None

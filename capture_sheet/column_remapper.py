@@ -8,6 +8,7 @@ class ColumnRemapper(BaseModel):
     original_columns: List[str]
     renamed_columns: Dict[str, str] = Field(default_factory=dict)
     sorted_columns: List[str] = Field(default_factory=list)
+    custom_columns: List[str] = Field(default_factory=list)
     column_map: Dict = Field(default_factory=dict)
 
     def __init__(self, *args, **kwargs):
@@ -21,6 +22,7 @@ class ColumnRemapper(BaseModel):
         any additional columns with the same prefix in the same order
         """
         result = dict()
+        custom_columns = list()
         original_sorted_columns = list()
         renamed_columns = dict()
 
@@ -29,6 +31,14 @@ class ColumnRemapper(BaseModel):
             additional_prefix_columns = [column for column in self.original_columns if column.startswith(prefix) and column not in column_range]
             additional_prefix_columns = [x for x in additional_prefix_columns if x not in original_sorted_columns]
 
+            range_start_position = self.original_columns.index(column_range[0])
+            range_end_position = self.original_columns.index(column_range[-1])
+            additional_non_prefix_columns = [x for i,x in enumerate(self.original_columns) if i > range_start_position and i < range_end_position]
+            additional_non_prefix_columns = [x for x in additional_non_prefix_columns if x not in additional_prefix_columns]
+            additional_non_prefix_columns = [x for x in additional_non_prefix_columns if x not in column_range]
+            custom_columns.extend(additional_prefix_columns)
+            custom_columns.extend(additional_non_prefix_columns)
+
             for i, column in enumerate(column_range):
                 if column not in self.original_columns:
                     raise ValueError(f"Column {column} not found in original columns")
@@ -36,9 +46,12 @@ class ColumnRemapper(BaseModel):
                 result[prefix].append(column)
                 original_sorted_columns.append(column)
 
+                # add the additional columns after the first column
                 if i == 0 and len(additional_prefix_columns) > 0:
                     result[prefix].extend(additional_prefix_columns)
                     original_sorted_columns.extend(additional_prefix_columns)
+                    result[prefix].extend(additional_non_prefix_columns)
+                    original_sorted_columns.extend(additional_non_prefix_columns)
         
         if len(original_sorted_columns) != len(self.original_columns):
             difference = [x for x in self.original_columns if x not in original_sorted_columns]
@@ -72,6 +85,7 @@ class ColumnRemapper(BaseModel):
         self.sorted_columns = renamed_sorted_columns
         self.renamed_columns = renamed_columns
         self.column_map = result
+        self.custom_columns = custom_columns
 
 
     def __get_column_range(self, prefix: str):
