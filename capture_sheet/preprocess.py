@@ -6,6 +6,7 @@ from .column_names import (
     ENTITY_CARDINALITY,
     ATTRIBUTE_CARDINALITY,
     DATA_CLASSIFICATION,
+    SCHEMA_TYPE,
 )
 
 
@@ -54,6 +55,11 @@ def preprocess_columns(
         DATA_VARIETY,
     ]:
         result_df = pascal_case_column_values(result_df, enum_col)
+    
+    for lower_col in [
+        SCHEMA_TYPE,
+    ]:
+        result_df[lower_col] = result_df[lower_col].fillna("").str.lower()
 
     return result_df
 
