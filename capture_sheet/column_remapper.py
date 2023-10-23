@@ -1,7 +1,7 @@
 from typing import List, Dict
 from itertools import chain
 from collections import Counter
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from .column_ranges import COLUMN_MAP
 from .column_ranges import EVENT_PREFIX, ENTITY_PREFIX, PROPERTY_PREFIX, ATTRIBUTE_PREFIX, SOURCE_PREFIX, REFERENCE_PREFIX
 
