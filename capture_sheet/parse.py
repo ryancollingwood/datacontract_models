@@ -28,7 +28,7 @@ class CaptureSheetParser:
     def __init__(self, rows: List[CaptureSheetRowModel], column_remapper: ColumnRemapper) -> None:
         self.rows = rows
         self.column_remapper = column_remapper
-        self.capture_sheet = CaptureSheetModel()
+        self.capture_sheet: CaptureSheetModel = CaptureSheetModel()
         self.last_event: LastEvent = None
         self.last_aggregate: LastAggregate = None
         self.property_buffer = list()
@@ -191,7 +191,7 @@ class CaptureSheetParser:
 
         self.aggregate_buffer.append(new_event_aggregate)
         
-    def parse(self):
+    def parse(self) -> CaptureSheetModel:
         for row in self.rows:
             self.parse_row(row)
 
