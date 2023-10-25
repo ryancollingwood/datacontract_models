@@ -37,8 +37,7 @@ def parse_capture_sheet_rows(
     rows: List[CaptureSheetRowModel], column_remapper: ColumnRemapper
 ):
     capture_sheet_parser = CaptureSheetParser(rows, column_remapper)
-    capture_sheet_parser.parse()
-    return capture_sheet_parser.capture_sheet
+    return capture_sheet_parser.parse()
 
 
 def generate_capture_sheet_code(
