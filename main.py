@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import warnings
 import black
 import pandas as pd
 from rich import print
@@ -61,12 +62,25 @@ def refactor_generated_code(generated_path: Path):
     generated_path.write_text(out)
 
 
-@logger.catch
-def main():
+def showwarning(message, *args, **kwargs):
+    global showwarning_
+    logger.warning(message)
+    showwarning_(message, *args, **kwargs)
+
+def setup_logger():
+    global logger
+
     logger.remove()
     logger.add(sys.stderr, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green>\t<level>{level}</level>\t{message}", level="INFO", colorize=True)
-    logger.add("app.log", format = "{time:YYYY-MM-DD HH:mm:ss}\t{level}\t{message}", rotation="50 MB", level="DEBUG")
-    logger.add("errors.log", format = "{time:YYYY-MM-DD HH:mm:ss}\t{level}\t{file}\t{function}\{line}\t{message}", backtrace=True, diagnose=True, serialize=True, level="ERROR", rotation="100 MB")
+    logger.add("app.log", format = "{time:YYYY-MM-DD HH:mm:ss}\t{level}\t{message}", rotation="10 MB", level="DEBUG")
+    logger.add("errors.log", format = "{time:YYYY-MM-DD HH:mm:ss}\t{level}\t{file}\t{function}\{line}\t{message}", backtrace=True, diagnose=True, serialize=True, level="WARNING", rotation="50 MB")
+
+    warnings.showwarning = showwarning
+
+
+@logger.catch
+def main():
+    setup_logger()
 
     Path("output").mkdir(parents=True, exist_ok=True)
     output_path = Path("output")
@@ -88,4 +102,6 @@ def main():
     logger.success("Done")
 
 if __name__ == "__main__":
+    showwarning_ = warnings.showwarning
+
     main()
