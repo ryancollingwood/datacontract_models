@@ -76,7 +76,7 @@ class CaptureSheetProcessor:
                 continue
 
             col_df = result_df[[EVENT, col]].copy()
-            col_df[EVENT] = col_df[EVENT].fillna(method="ffill")
+            col_df[EVENT] = col_df[EVENT].ffill()
 
             for _, group_df in col_df.groupby(EVENT):
                 group_values = [str(x) for x in group_df[col].unique() if not pd.isnull(x)]
