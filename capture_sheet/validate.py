@@ -3,6 +3,7 @@ from copy import deepcopy
 import json
 import pandas as pd
 from pydantic import ValidationError
+from loguru import logger
 from .models.capture_sheet_row_model import CaptureSheetRowModel
 from .column_names import OUTCOME, RESULT
 
@@ -81,16 +82,17 @@ def check_uniqueness(
     else:
         check_counts = check_df[check_column].value_counts()
 
+    msg = f"for column `{check_column}`"
     try:
-        msg = f"for column `{check_column}`"
         if partition_cols is not None:
             msg = f"{msg} for partition ({actual_partition})"
-        msg = f"Uniqueness check failed: {msg}"
-        # TODO: log the check_counts as part of the validation error output
-        assert max(check_counts) == 1, msg
+        max_count = max(check_counts)
+        logger.debug(f"Uniqueness check {msg}, max count: {max_count}")
+        assert max_count == 1, msg
     except AssertionError as e:
-        # TODO emit this in logging
-        print(check_counts[check_counts > 1])
+        error_msg = f"Uniqueness check failed: {msg}"
+        logger.error(error_msg)
+        logger.error(check_counts[check_counts > 1].to_dict())
         failed_col = check_counts.index.name
         failed_index = list(check_counts[check_counts > 1].index)
 

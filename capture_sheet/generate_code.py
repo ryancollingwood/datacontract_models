@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 import black
+from loguru import logger
 
 from common.str_utils import sluggify
 
@@ -19,11 +20,13 @@ def load_capture_sheet_rows(validation_path: Path, ignore_errors: bool = False):
 
     if len(error_rows) > 0:
         if ignore_errors:
-            print(
-                f"WARNING: {len(error_rows)} rows failed validation and will be ignored."
+            logger.warning(
+                f"{len(error_rows)} rows failed validation and will be ignored."
             )
         else:
-            raise Exception(f"{len(error_rows)} rows failed validation.")
+            execption_msg = f"{len(error_rows)} rows failed validation."
+            logger.error(execption_msg)
+            raise Exception(execption_msg)
 
     return [CaptureSheetRowModel(**x[RESULT]) for x in validation_data if x[OUTCOME]]
 
@@ -49,7 +52,7 @@ def generate_capture_sheet_code(
     generated_path = output_path / f"{generated_file_stem}.py"
 
     if generated_path.exists():
-        print(f"WARNING: {generated_path} already exists and will be overwritten.")
+        logger.warning(f"{generated_path} already exists and will be overwritten.")
 
     with open(generated_path, "w") as f:
         f.write("from models import *\n\n")

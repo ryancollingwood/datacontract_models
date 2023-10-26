@@ -1,6 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
+from loguru import logger
 
 from capture_sheet.column_names import (
     ATTRIBUTE,

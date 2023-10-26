@@ -1,7 +1,9 @@
+import sys
 from pathlib import Path
 import black
 import pandas as pd
 from rich import print
+from loguru import logger
 from capture_sheet.generate_code import generate_capture_sheet_code
 from common.str_utils import sluggify
 from refactoring import variable_extraction
@@ -27,8 +29,8 @@ def generate_code_from_capture_sheet(
     )
 
     if not csp.is_valid:
-        print("Validation failed. Please fix errors and try again.")
-        exit(1)
+        logger.error("Validation failed. Please fix errors and try again.")
+        exit(-1)
 
     generated_path = generate_capture_sheet_code(
         csp.validation_path, csp.output_path, sluggify(input_file_path.stem)
@@ -59,7 +61,13 @@ def refactor_generated_code(generated_path: Path):
     generated_path.write_text(out)
 
 
-if __name__ == "__main__":
+@logger.catch
+def main():
+    logger.remove()
+    logger.add(sys.stderr, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green>\t<level>{level}</level>\t{message}", level="INFO", colorize=True)
+    logger.add("app.log", format = "{time:YYYY-MM-DD HH:mm:ss}\t{level}\t{message}", rotation="50 MB", level="DEBUG")
+    logger.add("errors.log", format = "{time:YYYY-MM-DD HH:mm:ss}\t{level}\t{file}\t{function}\{line}\t{message}", backtrace=True, diagnose=True, serialize=True, level="ERROR", rotation="100 MB")
+
     Path("output").mkdir(parents=True, exist_ok=True)
     output_path = Path("output")
     output_path.mkdir(parents=True, exist_ok=True)
@@ -77,3 +85,7 @@ if __name__ == "__main__":
 
     contract = event_purchase_completed.to_contract()
     print(contract)
+    logger.success("Done")
+
+if __name__ == "__main__":
+    main()

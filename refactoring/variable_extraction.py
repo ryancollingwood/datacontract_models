@@ -1,5 +1,7 @@
 import ast
 from typing import List, Union, Dict
+
+from loguru import logger
 import rope.base.project
 from rope.base import libutils
 from rope.refactor.extract import ExtractVariable
@@ -27,6 +29,7 @@ def variable_extraction(
     my_project = rope.base.project.Project(project_path)
 
     for var_type in var_types:
+        logger.info(f"Extracting {var_type} variables from {file_name}")
         while True:
             myresource = libutils.path_to_resource(my_project, file_name)
             mymodule = libutils.get_string_module(my_project, myresource.read())
@@ -42,14 +45,14 @@ def variable_extraction(
             replaced_code = unparse(replace_node)
 
             if debug:
-                print(dump_node_detail(replace_node))
+                logger.debug(dump_node_detail(replace_node))
 
             start, end = get_node_start_end(replace_node, mymodule)
             extracted_replaced_code = myresource.read()[start:end]
 
             if debug:
-                print("extracted from start and end:", extracted_replaced_code)
-                print("unparsed node code:", replaced_code)
+                logger.debug("extracted from start and end:", extracted_replaced_code)
+                logger.debug("unparsed node code:", replaced_code)
 
             var_name = get_node_replacement_var_name(replace_node, var_type)
 
@@ -58,12 +61,12 @@ def variable_extraction(
                 leaf_nodes = ast_anytree.get_leaf_names(id(replace_node))
                 var_name = sluggify("_".join(leaf_nodes))
                 if var_name in replacement_var_names.keys():
-                    raise ValueError(
-                        f"Already have a variable name: {var_name} - with value: {replacement_var_names[var_name]}"
-                    )
+                    error_msg = f"Already have a variable name: {var_name} - with value: {replacement_var_names[var_name]}"
+                    logger.error(error_msg)
+                    raise ValueError(error_msg)
 
             if debug:
-                print(var_name)
+                logger.debug(var_name)
 
             extractor = ExtractVariable(my_project, myresource, start, end)
 
@@ -76,7 +79,7 @@ def variable_extraction(
             )
 
             if debug:
-                print(changes.get_description())
+                logger.debug(changes.get_description())
 
             my_project.do(changes)
 
