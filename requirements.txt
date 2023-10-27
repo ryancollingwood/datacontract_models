@@ -6,4 +6,5 @@ black>=23.7.0
 rope>=1.9.0
 anytree>=2.9.0
 loguru>=0.7.2
+clize>=5.0.2
 pytest

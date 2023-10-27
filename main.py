@@ -3,6 +3,7 @@ from pathlib import Path
 import warnings
 import black
 import pandas as pd
+from clize import run
 from rich import print
 from loguru import logger
 from capture_sheet.generate_code import generate_capture_sheet_code
@@ -79,29 +80,37 @@ def setup_logger():
 
 
 @logger.catch
-def main():
+def process_spreadsheet(input_file: str, sheet_name: str = "Sheet1", output_dir: str = "output"):
+    """Process a spreadsheet and generate code from it
+
+    :param input_file: (str): Path to the input spreadsheet
+    :param sheet_name: (str, optional): Name of the sheet in `input_file`, defaults to `"Sheet1"`
+    :param output_dir: (str, optional): Path were generated outputs will be written, defaults to `"output"`
+    """
     setup_logger()
 
-    Path("output").mkdir(parents=True, exist_ok=True)
-    output_path = Path("output")
+    output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    input_file_path = Path("resources/Ecommerce Events.xlsx")
-    sheet_name = "Sheet1"
+    input_file_path = Path(input_file)
 
     generated_path = generate_code_from_capture_sheet(
         input_file_path, output_path, sheet_name=sheet_name
     )
     refactor_generated_code(generated_path)
 
+    logger.success("Done")
+
+def demo():
+    process_spreadsheet("resources/ecommerce_events.xlsx")
+
     # now this will be available for import after generation
     from output.ecommerce_events import event_purchase_completed
 
     contract = event_purchase_completed.to_contract()
     print(contract)
-    logger.success("Done")
 
 if __name__ == "__main__":
     showwarning_ = warnings.showwarning
 
-    main()
+    run(process_spreadsheet)
