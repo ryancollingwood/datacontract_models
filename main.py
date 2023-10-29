@@ -25,7 +25,19 @@ from models import (
 
 def generate_code_from_capture_sheet(
     input_file_path: Path, output_path: Path, sheet_name: str = "Sheet1"
-):
+) -> Path:
+    """
+    Generate code from a capture spreadsheet
+
+    Args:
+        input_file_path (Path): Path to the input spreadsheet file
+        output_path (Path): Directory where generated code will be written
+        sheet_name (str, optional): Worksheet name in the spreadsheet 
+            Defaults to "Sheet1".
+
+    Returns:
+        Path: Path the the generated code file
+    """
     csp = CaptureSheetProcessor(
         pd.read_excel(input_file_path, sheet_name=sheet_name), output_path
     )
@@ -41,6 +53,13 @@ def generate_code_from_capture_sheet(
 
 
 def refactor_generated_code(generated_path: Path):
+    """
+    Refactor the generated code, as it will be verbose
+    and not DRY at all.
+
+    Args:
+        generated_path (Path): Path the the generated code file
+    """
     variable_extraction(
         generated_path,
         [
@@ -63,12 +82,24 @@ def refactor_generated_code(generated_path: Path):
     generated_path.write_text(out)
 
 
-def showwarning(message, *args, **kwargs):
+def showwarning(message: Warning | str, *args, **kwargs):
+    """
+    Lifted from: https://loguru.readthedocs.io/en/stable/resources/migration.html#replacing-capturewarnings-function
+    So that any warnings raised from imported modules can be captured
+
+    Args:
+        message (Warning | str): Warning message
+    """
     global showwarning_
     logger.warning(message)
     showwarning_(message, *args, **kwargs)
 
 def setup_logger():
+    """
+    Setup the logger
+
+    TODO: Make this configurable
+    """
     global logger
 
     logger.remove()
@@ -102,7 +133,10 @@ def process_spreadsheet(input_file: str, sheet_name: str = "Sheet1", output_dir:
     logger.success("Done")
 
 def demo():
-    process_spreadsheet("resources/ecommerce_events.xlsx")
+    """
+    This is a demo of how to generate code from a spreadsheet and then import it
+    """
+    process_spreadsheet("resources/ecommerce_events.xlsx", sheet_name="Sheet1", output_dir="output")
 
     # now this will be available for import after generation
     from output.ecommerce_events import event_purchase_completed
@@ -110,7 +144,7 @@ def demo():
     contract = event_purchase_completed.to_contract()
     print(contract)
 
-if __name__ == "__main__":
-    showwarning_ = warnings.showwarning
+showwarning_ = warnings.showwarning
 
+if __name__ == "__main__":
     run(process_spreadsheet)
