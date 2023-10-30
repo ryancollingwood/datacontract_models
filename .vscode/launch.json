@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Main Demo",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args":[
+                "resources/Ecommerce Events.xlsx", 
+                "Sheet1", 
+                "output"
+            ]
+        }
+    ]
+}
