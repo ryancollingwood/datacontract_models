@@ -218,7 +218,7 @@ event_sign_up_completed = Event(
             aggregate=aggregate_user_profile,
         ),
     ],
-    description="User successfully signs up\n\n\n\n\n\n\n\n\n\n\n\n",
+    description="User successfully signs up",
     kpi="First Purchase Completed within 7 Days of Account Creation",
 )
 
@@ -622,7 +622,7 @@ event_item_added_to_cart = Event(
             aggregate=aggregate_shopping_cart_line,
         )
     ],
-    description="User adds an item to cart\n\n\n\n\n\n\n\n\n",
+    description="User adds an item to cart",
     kpi="First Purchase Completed within 7 Days of Account Creation",
 )
 
@@ -848,7 +848,7 @@ event_view_checkout = Event(
             aggregate=view_checkout_shopping_cart_line,
         ),
     ],
-    description="User views checkout page\n\n\n\n\n\n\n",
+    description="User views checkout page",
     kpi="# of items removed from cart/WAB",
 )
 
@@ -1075,7 +1075,7 @@ event_purchase_completed = Event(
             aggregate=purchase_completed_user_profile,
         ),
     ],
-    description="User completes purchase\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    description="User completes purchase",
     kpi="# of Purchases / Weekly Active Buyers (WAB),Average purchase price,Time to convert,Bought Items/Searches,Active Buyers (6-month window)\n,First Purchase Completed within 7 Days of Account Creation,7-Day Retention",
 )
 

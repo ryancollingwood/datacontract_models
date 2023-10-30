@@ -93,3 +93,13 @@ class CaptureSheetRowModel(CaptureSheetBaseModel):
                 """
                 msg = "If schema_type is UUID or GUID - data_variety must be LOCALLY_UNIQUE or GLOBALLY_UNIQUE"
                 assert not is_variety_unique, msg
+        
+        return value
+    
+    @model_validator(mode="after")
+    def remove_model_extra_whitespace(cls, value: "CaptureSheetRowModel"):
+        for extra_key, extra_value in value.model_extra.items():
+            if isinstance(extra_value, str):
+                value.model_extra[extra_key] = extra_value.strip()
+        
+        return value
