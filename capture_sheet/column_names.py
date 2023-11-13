@@ -19,5 +19,7 @@ REFERENCE_COLUMN = 'reference_column'
 REFERENCE_TABLE = 'reference_table'
 REFERENCE_DATABASE = 'reference_database'
 
+DBO = 'dbo'
+
 OUTCOME = 'outcome'
 RESULT = 'result'

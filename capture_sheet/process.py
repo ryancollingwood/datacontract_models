@@ -18,6 +18,7 @@ from capture_sheet.column_names import (
     SCHEMA_TYPE,
     SEMANTIC_TYPE,
     TABLE,
+    DBO,
 )
 from capture_sheet.file_names import (
     get_column_remapper_path,
@@ -130,10 +131,10 @@ class CaptureSheetProcessor:
     def __make_dbo_columns(self, df: pd.DataFrame):
         db_cols_df = df[[DATABASE, TABLE, COLUMN]].copy().dropna()
         if len(db_cols_df) == 0:
-            df["dbo"] = np.nan
+            df[DBO] = np.nan
             return df
         
-        df["dbo"] = db_cols_df.apply(lambda x: ".".join(x), axis=1)
+        df[DBO] = db_cols_df.apply(lambda x: ".".join(x), axis=1)
         return df
 
     def __validate_capture_sheet(self):
@@ -187,23 +188,24 @@ class CaptureSheetProcessor:
 
         validate_df = self.__make_dbo_columns(validate_df)
 
-        # Creating a new column to check uniqueness of the combination of:
-        # database, table, column schema_type, not_null, and is_unique values
-        self.__capture_uniqueness_check_failures(
-            check_uniqueness(
-                validate_df,
-                "dbo",
-                column_remapper.source_columns,
+        if not validate_df[DBO].isnull().all():
+            # Creating a new column to check uniqueness of the combination of:
+            # database, table, column schema_type, not_null, and is_unique values
+            self.__capture_uniqueness_check_failures(
+                check_uniqueness(
+                    validate_df,
+                    DBO,
+                    column_remapper.source_columns,
+                )
             )
-        )
 
-        self.__capture_uniqueness_check_failures(
-            check_uniqueness(
-                validate_df,
-                "dbo",
-                column_remapper.reference_columns,
+            self.__capture_uniqueness_check_failures(
+                check_uniqueness(
+                    validate_df,
+                    DBO,
+                    column_remapper.reference_columns,
+                )
             )
-        )
 
         if self.failed_uniqueness_checks is not None:
             self.failed_uniqueness_checks.reindex().to_csv(
