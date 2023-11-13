@@ -81,6 +81,15 @@ def check_uniqueness(
             check_counts = check_df.groupby(parent_cols)[check_column].value_counts()
     else:
         check_counts = check_df[check_column].value_counts()
+    
+    msg = f"No values found for column `{check_column}`"
+    try:
+        assert len(check_counts) > 0, f"No values found for column `{check_column}`"
+    except AssertionError as e:
+        error_msg = f"Uniqueness check failed: {msg}"
+        logger.error(error_msg)
+        return check_df
+
 
     msg = f"for column `{check_column}`"
     try:

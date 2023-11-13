@@ -123,9 +123,18 @@ class CaptureSheetProcessor:
         if self.failed_uniqueness_checks is None:
             self.failed_uniqueness_checks = value
         else:
-            self.failed_uniqueness_checks = pd.conat(
+            self.failed_uniqueness_checks = pd.concat(
                 [self.failed_uniqueness_checks, value]
             )
+
+    def __make_dbo_columns(self, df: pd.DataFrame):
+        db_cols_df = df[[DATABASE, TABLE, COLUMN]].copy().dropna()
+        if len(db_cols_df) == 0:
+            df["dbo"] = np.nan
+            return df
+        
+        df["dbo"] = db_cols_df.apply(lambda x: ".".join(x), axis=1)
+        return df
 
     def __validate_capture_sheet(self):
         column_remapper = self.column_remapper
@@ -176,14 +185,10 @@ class CaptureSheetProcessor:
             )
         )
 
+        validate_df = self.__make_dbo_columns(validate_df)
+
         # Creating a new column to check uniqueness of the combination of:
         # database, table, column schema_type, not_null, and is_unique values
-        validate_df["dbo"] = (
-            validate_df[[DATABASE, TABLE, COLUMN]]
-            .dropna()
-            .apply(lambda x: ".".join(x), axis=1)
-        )
-
         self.__capture_uniqueness_check_failures(
             check_uniqueness(
                 validate_df,
