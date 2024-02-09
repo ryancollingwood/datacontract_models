@@ -8,7 +8,7 @@ from rope.refactor.extract import ExtractVariable
 
 from common.str_utils import sluggify
 from .ast_anytree import AstAnytree
-from .ast_node_utils import dump_node_detail, unparse, walk_filter, get_node_start_end
+from .ast_node_utils import dump_node_detail, unparse, walk_call_filter, get_node_start_end
 
 
 
@@ -37,7 +37,7 @@ def variable_extraction(
             # I could pass in the list, but I'm going to do one at a time
             # additionally we're extract one variable at a time as the refactoring
             # alters the position of things
-            results = walk_filter(mymodule.ast_node, [var_type], 1)
+            results = walk_call_filter(mymodule.ast_node, [var_type], 1)
             if len(results) == 0:
                 break
 
