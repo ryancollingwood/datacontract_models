@@ -5,7 +5,7 @@ from typing import List
 from .annotate_node_transformer import AnnotateNodeTransformer
 
 class AstAnytree:
-    def __init__(self, module, filter_ids: List[str]):
+    def __init__(self, module: ast.Module, filter_ids: List[str]):
         self.filter_ids = filter_ids
         self.module = AnnotateNodeTransformer(module, filter_ids).visit(module)
         self.root = None
