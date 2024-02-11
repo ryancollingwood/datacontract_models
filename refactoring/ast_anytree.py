@@ -1,5 +1,6 @@
 import ast
 import anytree
+import logging
 
 from typing import List
 from .annotate_node_transformer import AnnotateNodeTransformer
@@ -9,11 +10,13 @@ class AstAnytree:
         self.filter_ids = filter_ids
         self.module = AnnotateNodeTransformer(module, filter_ids).visit(module)
         self.root = None
+        # keep a map so we can immediately access 
         self.tree_nodes = dict()
 
     def build_tree(self):
         """
-        Build a tree from the given ast node (assumed to be a module)
+        Build the tree from the module, so that we can travel up tree (get parents)
+        and travel down the tree (get children)
 
         Raises:
             ValueError: If there is already a root node and we attempt to add another
@@ -26,7 +29,11 @@ class AstAnytree:
         self.tree_nodes = dict()
 
         for node in ast.walk(self.module):
-            node_id = id(node)
+            node_id = get_node_id(node)
+
+            if node_id in self.tree_nodes:
+                logging.debug(f"Duplicate node already in tree: {ast.dump(node)}")
+                continue
 
             if isinstance(node, ast.Module):
                 if self.root is None:
@@ -37,7 +44,9 @@ class AstAnytree:
                     self.tree_nodes[node_id] = self.root
                 else:
                     raise ValueError("Already have a root node")
-        
+                
+                continue
+
             self.tree_nodes[node_id] = anytree.AnyNode(
                 id = node_id, 
                 var_name = node._name,
@@ -46,14 +55,14 @@ class AstAnytree:
                 )
 
         for node in ast.walk(self.module):
-            node_id = id(node)
+            node_id = get_node_id(node)
 
-            if id(node) == self.root.id:
+            if node_id == self.root.id:
                 self.tree_nodes[node_id].parent = None
                 self.root = self.tree_nodes[node_id]
                 continue
         
-            parent_id = id(node._parent)
+            parent_id = get_node_id(node._parent)
         
             if parent_id not in self.tree_nodes:
                 raise ValueError(f"missing parent node: {parent_id} - for node: {node_id}")
@@ -71,7 +80,7 @@ class AstAnytree:
     def search_tree_by_var_name(self, value):
         return anytree.search.findall(self.root, filter_=lambda node: node.var_name == value)
 
-    def get_leaf_names(self, node_id) -> List[str]:
+    def get_leaf_names(self, node) -> List[str]:
         """
         For the given node_id return the variable names of parent nodes
         if they are within the filter_ids. 
@@ -83,12 +92,17 @@ class AstAnytree:
             List[str]: var_names of parent nodes that macth the filter_ids
         """
         leaf_var_names = list()
+        node_id = get_node_id(node)
         leaf_node = self.tree_nodes[node_id]
 
         while leaf_node.parent is not None:
-            leaf_var_names.insert(0, leaf_node.var_name)
+            if leaf_node.var_name not in leaf_var_names:
+                leaf_var_names.insert(0, leaf_node.var_name)
             leaf_node = leaf_node.parent
 
         leaf_var_names = [x for x in leaf_var_names if x is not None]
 
         return leaf_var_names
+    
+def get_node_id(node):
+    return id(node)
