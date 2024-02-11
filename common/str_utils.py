@@ -20,7 +20,7 @@ def sluggify(text):
   i.e. all lowercase, no spaces instead underspaces, 
     digits and underscores allowed but not as the first character
   """
-  result = str(re.sub(r"\W+", " ", text)).lower()
+  result = str(re.sub(r"\W+", " ", str(text))).lower()
   # if we needed to normalise characters: unicodedata.normalize('NFKD', s)
   result = re.sub(r"\s{2,}", " ", result).strip()
 

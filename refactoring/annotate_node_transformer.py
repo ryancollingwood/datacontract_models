@@ -54,5 +54,21 @@ class AnnotateNodeTransformer(ast.NodeTransformer):
           node._name = sluggify(node.value.keywords[0].value.value)
         except AttributeError as e:
           pass
+
+        if node._name is None and node._matched_id is not None:
+            # In the case of Call node that isn't 
+            # being assigned to a variable name
+            # look at the keywords for one named "name"
+            try:
+                criteria = [
+                    isinstance(node, ast.Call),
+                    len(node.keywords) > 0
+                    ]
+                if all(criteria):
+                    name_keywords = [x for x in node.keywords if x.arg == "name"]
+                    if len(name_keywords) == 1:
+                        node._name = sluggify(name_keywords[0].value.value)
+            except AttributeError:
+                pass
           
         return node
