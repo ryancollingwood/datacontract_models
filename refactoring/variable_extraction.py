@@ -116,7 +116,7 @@ def get_node_replacement_var_name_from_parents(var_types: List[str], replacement
         str
     """
     ast_anytree = AstAnytree(module, var_types).build_tree()
-    leaf_nodes = ast_anytree.get_leaf_names(id(node))
+    leaf_nodes = ast_anytree.get_leaf_names(node)
     var_name = sluggify("_".join(leaf_nodes))
     if var_name in replacement_var_names.keys():
         error_msg = f"Already have a variable name: {var_name} - with value: {replacement_var_names[var_name]}"
