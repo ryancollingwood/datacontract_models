@@ -16,7 +16,8 @@ class AstAnytree:
     def build_tree(self):
         """
         Build the tree from the module, so that we can travel up tree (get parents)
-        and travel down the tree (get children)
+        and travel down the tree (get children). As ast.walk is "in no specified order"
+        the walk happens twice
 
         Raises:
             ValueError: If there is already a root node and we attempt to add another
@@ -54,6 +55,8 @@ class AstAnytree:
                 location = node._location,
                 )
 
+        # now that we've walked there entire tree
+        # do it again so we can assign parents
         for node in ast.walk(self.module):
             node_id = get_node_id(node)
 
