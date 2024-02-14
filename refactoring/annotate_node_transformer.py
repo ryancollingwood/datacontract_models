@@ -68,6 +68,9 @@ class AnnotateNodeTransformer(ast.NodeTransformer):
                     name_keywords = [x for x in node.keywords if x.arg == "name"]
                     if len(name_keywords) == 1:
                         node._name = sluggify(name_keywords[0].value.value)
+                    else:
+                        node._name = sluggify(" ".join([x.value.value for x in node.value.keywords if isinstance(x.value.value, str)]))
+
             except AttributeError:
                 pass
           
