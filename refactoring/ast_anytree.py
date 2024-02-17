@@ -92,7 +92,7 @@ class AstAnytree:
             node_id (int):
 
         Returns:
-            List[str]: var_names of parent nodes that macth the filter_ids
+            List[str]: var_names of parent nodes that match the filter_ids
         """
         leaf_var_names = list()
         node_id = get_node_id(node)
