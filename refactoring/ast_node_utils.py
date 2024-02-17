@@ -1,7 +1,7 @@
 import ast
 from typing import List, Tuple
-import rope
 
+import rope
 
 def dump_node_detail(node: ast.AST):
     """

@@ -1,7 +1,7 @@
 import ast
 
-from common.str_utils import sluggify
-from refactoring.ast_node_utils import get_node_start_end
+from .ast_node_utils import get_node_start_end
+from .node_replacement_var_name import node_replacement_var_name
 
 
 class AnnotateNodeTransformer(ast.NodeTransformer):
@@ -15,6 +15,7 @@ class AnnotateNodeTransformer(ast.NodeTransformer):
       self.module = module
       # current parent (module)
       self.parent = None
+      self.history = list()
 
     def visit(self, node):
         # set parent attribute for this node
@@ -49,26 +50,6 @@ class AnnotateNodeTransformer(ast.NodeTransformer):
         except AttributeError:
           pass
 
-        node._name = None
-        try:
-          node._name = sluggify(node.value.keywords[0].value.value)
-        except AttributeError as e:
-          pass
+        node._name = node_replacement_var_name(node, fallback_compose_from_keywords=False)
 
-        if node._name is None and node._matched_id is not None:
-            # In the case of Call node that isn't 
-            # being assigned to a variable name
-            # look at the keywords for one named "name"
-            try:
-                criteria = [
-                    isinstance(node, ast.Call),
-                    len(node.keywords) > 0
-                    ]
-                if all(criteria):
-                    name_keywords = [x for x in node.keywords if x.arg == "name"]
-                    if len(name_keywords) == 1:
-                        node._name = sluggify(name_keywords[0].value.value)
-            except AttributeError:
-                pass
-          
         return node

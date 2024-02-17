@@ -1,6 +1,6 @@
 import ast
 
-from refactoring.variable_extraction import get_node_replacement_var_name
+from refactoring.variable_extraction import node_replacement_var_name
 
 
 def test_get_node_replacement_var_name_from_expression():
@@ -10,7 +10,7 @@ def test_get_node_replacement_var_name_from_expression():
     expected = "singer_billy_idol"
 
     ast_node = ast.parse(code_str).body[0]
-    result = get_node_replacement_var_name(ast_node, "Singer")
+    result = node_replacement_var_name(ast_node, "Singer")
 
     assert result == expected
 
@@ -22,7 +22,7 @@ def test_get_node_replacement_var_name_from_expression_with_extra_spaces():
     expected = "singer_andrew_w_k"
 
     ast_node = ast.parse(code_str).body[0]
-    result = get_node_replacement_var_name(ast_node, "Singer")
+    result = node_replacement_var_name(ast_node, "Singer")
 
     assert result == expected
 
@@ -35,6 +35,6 @@ def test_get_node_replacement_var_name_from_expression_with_but_no_name():
     expected = "fruit_factory_downtown_in_a_can"
     
     ast_node = ast.parse(code_str).body[0]
-    result = get_node_replacement_var_name(ast_node, "fruit")
+    result = node_replacement_var_name(ast_node, "fruit")
     
     assert result == expected
