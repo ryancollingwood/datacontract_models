@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from .schema_type import SchemaType
 from .data_classification import DataClassification
@@ -107,6 +107,8 @@ class Property(MetaSchemaContainerModel):
         
         if source:
             schema_type = source.schema_type
+
+        if schema_type:
             is_temporal = schema_type.is_temporal()
             is_timestamp = schema_type.is_timestamp()
 
@@ -122,6 +124,17 @@ class Property(MetaSchemaContainerModel):
                 pass
 
         return timing
+    
+    @model_validator(mode="after")
+    def check_schema_type_and_variety(cls, value: "Property"):
+        specified_variety = value.attribute.semantic_type.variety
+        specified_source = value.source
+
+        if specified_variety and specified_source:
+            if specified_source.schema_type.is_boolean() and specified_variety != Variety.LIMITED_SUBSET:
+                value.attribute.semantic_type.variety = Variety.LIMITED_SUBSET
+        
+        return value
 
 
 class Aggregate(MetaSchemaModel):

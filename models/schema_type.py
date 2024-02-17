@@ -56,3 +56,14 @@ class SchemaType(MetaSchemaEnum):
             SchemaType.UTC_TIMESTAMP,
             SchemaType.EPOCH_TIMESTAMP,
         ]
+    
+    def is_boolean(self):
+        """
+        Is the schema type a boolean. 
+        It can it only be 1 of 2 possible values, 
+        and those values contradict another.
+        Example: True or False, Yes or No
+        """
+        return self in [
+            SchemaType.BOOLEAN,
+        ]

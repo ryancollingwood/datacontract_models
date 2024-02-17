@@ -11,6 +11,14 @@ reference_database_column = DatabaseColumn(
         is_unique=True,
     )
 
+boolean_database_column = DatabaseColumn(
+    name = "is_active",
+    table=reference_database_table,
+    schema_type=SchemaType.BOOLEAN,
+    not_null=True,
+    is_unique=False,
+)
+
 
 def test_database_column():
     database_column = DatabaseColumn(
