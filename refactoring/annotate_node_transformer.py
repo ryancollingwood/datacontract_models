@@ -15,6 +15,7 @@ class AnnotateNodeTransformer(ast.NodeTransformer):
       self.module = module
       # current parent (module)
       self.parent = None
+      self.history = list()
 
     def visit(self, node):
         # set parent attribute for this node
@@ -50,28 +51,68 @@ class AnnotateNodeTransformer(ast.NodeTransformer):
           pass
 
         node._name = None
-        try:
-          node._name = sluggify(node.value.keywords[0].value.value)
-        except AttributeError as e:
-          pass
 
-        if node._name is None and node._matched_id is not None:
-            # In the case of Call node that isn't 
-            # being assigned to a variable name
-            # look at the keywords for one named "name"
-            try:
-                criteria = [
-                    isinstance(node, ast.Call),
-                    len(node.keywords) > 0
-                    ]
-                if all(criteria):
-                    name_keywords = [x for x in node.keywords if x.arg == "name"]
-                    if len(name_keywords) == 1:
-                        node._name = sluggify(name_keywords[0].value.value)
-                    else:
-                        node._name = sluggify(" ".join([x.value.value for x in node.value.keywords if isinstance(x.value.value, str)]))
+        if not isinstance(node, ast.Call) and not isinstance(node, ast.Assign) and not isinstance(node, ast.keyword):
+           return node
+        
+        keywords = None
+        if isinstance(node, ast.Assign) and 'value' in node._fields and isinstance(node.value, ast.Call) and 'keywords' in node.value._fields:
+            """
+            node._name: customer
+            code: 
+                actor_customer = Actor(name='Customer')
+            ast: 
+                Assign(
+                    targets=[Name(id='actor_customer', ctx=Store())], 
+                    value=Call(
+                        func=Name(id='Actor', ctx=Load()), 
+                        args=[], 
+                        keywords=[
+                            keyword(arg='name', value=Constant(value='Customer'))
+                            ]
+                        )
+                    )
+            """
+            keywords = node.value.keywords
+        elif isinstance(node, ast.keyword) and 'value' in node._fields and isinstance(node.value, ast.Call) and 'keywords' in node.value._fields:
+            """
+            node._name: user_registration
+            code:
+                aggregate=Aggregate(
+                        name='User Registration', 
+                        properties=[
+                            Property(cardinality=Cardinality.ONLY_ONE, attribute=propertyattribute_user_id, source=databasecolumn_user_id, timing=None, type='User Property', sample_values='c81159b1-2658-5fba-b59b-16a0d4e30217'), 
+                            Property(cardinality=Cardinality.ONLY_ONE, attribute=propertyattribute_registration_date, source=databasecolumn_registered_at, timing=MetaTiming.UNSPECIFIED, type='User Property', sample_values='YYYY-MM-DDTHH:MM:SS'), 
+                            Property(cardinality=Cardinality.ONLY_ONE, attribute=propertyattribute_registration_method, source=databasecolumn_registration_provider_id, timing=None, type='User Property', sample_values='Google, Facebook, E-mail')
+                            ]
+                        )
+            ast:
+                keyword(
+                    arg="aggregate",
+                    value=Call(
+                        func=Name(id="Aggregate", ctx=Load()),
+                        args=[],
+                        keywords=[
+                            keyword(arg="name", value=Constant(value="User Registration")),
+                        ],
+                    ),
+                )
+            """
+            keywords = node.value.keywords
+        
+        if keywords is None:
+           return node
+        
+        if len(keywords) == 0:
+           return node
 
-            except AttributeError:
-                pass
-          
+        node._name = sluggify(keywords[0].value.value)
+
+        name_keywords = [x for x in keywords if x.arg == "name"]
+
+        if len(name_keywords) == 1:
+            node._name = sluggify(name_keywords[0].value.value)
+        else:
+            node._name = sluggify(" ".join([x.value.value for x in keywords if isinstance(x.value.value, str)]))
+
         return node
